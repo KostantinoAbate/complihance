@@ -1,0 +1,11 @@
+{
+  "resources/js/complihance.js": {
+    "file": "assets/complihance-Cr_kruq-.js",
+    "name": "complihance",
+    "src": "resources/js/complihance.js",
+    "isEntry": true,
+    "css": [
+      "assets/complihance-BVL--oDP.css"
+    ]
+  }
+}
