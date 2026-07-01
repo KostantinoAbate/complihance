@@ -109,11 +109,13 @@ class CookieScanner
                 foreach ($parts as $part) {
                     if (strtolower($part) === 'secure') {
                         $cookie['secure'] = true;
+
                         continue;
                     }
 
                     if (strtolower($part) === 'httponly') {
                         $cookie['http_only'] = true;
+
                         continue;
                     }
 

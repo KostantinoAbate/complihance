@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
 use KostantinoAbate\Complihance\DTO\StoredConsentResult;
 use KostantinoAbate\Complihance\Facades\ComplihancePolicy;
-use KostantinoAbate\Complihance\Models\ComplihancePolicyAcceptance;
 use KostantinoAbate\Complihance\Models\Consent;
 use KostantinoAbate\Complihance\Services\VendorConsentResolver;
 use KostantinoAbate\Complihance\Support\GranularConsent;
@@ -21,7 +20,7 @@ class StoreConsentAction
 
         $data = $request->validate([
             'categories' => ['required', 'array'],
-            'categories.*' => ['string', 'in:' . implode(',', $categoryKeys)],
+            'categories.*' => ['string', 'in:'.implode(',', $categoryKeys)],
             'vendors' => ['sometimes', 'array'],
             'vendors.*' => ['string'],
         ]);

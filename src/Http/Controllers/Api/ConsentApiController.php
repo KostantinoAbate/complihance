@@ -5,12 +5,9 @@ namespace KostantinoAbate\Complihance\Http\Controllers\Api;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Str;
-use KostantinoAbate\Complihance\Http\Requests\StoreConsentRequest;
-use KostantinoAbate\Complihance\Http\Requests\UpdateConsentRequest;
+use KostantinoAbate\Complihance\Actions\StoreConsentAction;
 use KostantinoAbate\Complihance\Models\Consent;
 use KostantinoAbate\Complihance\Support\ConsentPayloadBuilder;
-use KostantinoAbate\Complihance\Actions\StoreConsentAction;
 
 class ConsentApiController extends Controller
 {

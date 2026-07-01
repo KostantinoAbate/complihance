@@ -35,8 +35,8 @@ class ResetCommand extends Command
         $this->newLine();
 
         $this->line('Current configured versions:');
-        $this->line('- Cookie configuration version: ' . config('complihance.cookie_configuration_version'));
-        $this->line('- Cookie policy version: ' . config('complihance.policies.cookie.version'));
+        $this->line('- Cookie configuration version: '.config('complihance.cookie_configuration_version'));
+        $this->line('- Cookie policy version: '.config('complihance.policies.cookie.version'));
 
         return self::SUCCESS;
     }

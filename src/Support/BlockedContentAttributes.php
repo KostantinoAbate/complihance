@@ -38,7 +38,7 @@ class BlockedContentAttributes
                         return $key;
                     }
 
-                    return $key . '="' . e((string) $value) . '"';
+                    return $key.'="'.e((string) $value).'"';
                 })
                 ->implode(' ')
         );

@@ -25,7 +25,7 @@ class BrowserCookieScanner
                     "npx playwright install chromium\n\n".
                     "In Docker/Linux environments, make sure Chromium system dependencies are installed in the image.\n\n".
                     "Alternatively, run the HTTP-only scanner:\n".
-                    "php artisan complihance:scan-cookies <url> --http-header-only"
+                    'php artisan complihance:scan-cookies <url> --http-header-only'
                 );
             }
 

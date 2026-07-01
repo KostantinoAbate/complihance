@@ -4,8 +4,8 @@ namespace KostantinoAbate\Complihance\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
-use KostantinoAbate\Complihance\Models\Consent;
 use KostantinoAbate\Complihance\Models\ComplihancePolicyAcceptance;
+use KostantinoAbate\Complihance\Models\Consent;
 
 class RetentionCommand extends Command
 {

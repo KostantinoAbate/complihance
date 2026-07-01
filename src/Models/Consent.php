@@ -3,8 +3,8 @@
 namespace KostantinoAbate\Complihance\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
 
 class Consent extends Model
 {
