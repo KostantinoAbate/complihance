@@ -1,0 +1,115 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up()
+    {
+        Schema::create('complihance_consents', function (Blueprint $table) {
+            $table->id();
+            $table->uuid('consent_uuid')->unique();
+
+            $table->nullableMorphs('subject');
+
+            $table->string('session_id')->nullable()->index();
+            $table->string('anonymous_id')->nullable()->index();
+
+            $table->json('accepted_categories');
+            $table->json('rejected_categories')->nullable();
+
+            $table->json('vendors')->nullable();
+
+            $table->string('policy_version')->nullable();
+            $table->string('cookie_configuration_version')->nullable();
+
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+
+            $table->timestamp('accepted_at')->nullable();
+            $table->timestamp('revoked_at')->nullable();
+
+            $table->timestamps();
+        });
+
+        Schema::create('complihance_policies', function (Blueprint $table) {
+            $table->id();
+            $table->string('key')->index(); // privacy, cookie
+            $table->string('version')->index();
+            $table->string('title');
+            $table->longText('content')->nullable();
+            $table->string('view')->nullable();
+            $table->boolean('is_active')->default(false)->index();
+            $table->timestamp('published_at')->nullable()->index();
+            $table->timestamps();
+
+            $table->unique(['key', 'version']);
+        });
+
+        Schema::create('complihance_policy_acceptances', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('consent_id')
+                ->nullable()
+                ->constrained('complihance_consents')
+                ->nullOnDelete();
+
+            $table->string('subject_type', 150)->nullable();
+            $table->unsignedBigInteger('subject_id')->nullable();
+            $table->index(['subject_type', 'subject_id']);
+
+            $table->string('session_id', 100)->nullable()->index();
+            $table->string('anonymous_id', 100)->nullable()->index();
+
+            $table->string('policy_key', 100)->index();
+            $table->string('policy_version', 100)->index();
+
+            $table->string('source', 100)->nullable()->index();
+
+            $table->json('metadata')->nullable();
+
+            $table->ipAddress('ip_address')->nullable();
+            $table->text('user_agent')->nullable();
+
+            $table->timestamp('accepted_at')->index();
+
+            $table->timestamps();
+
+            $table->unique([
+                'subject_type',
+                'subject_id',
+                'policy_key',
+                'policy_version',
+                'source',
+            ], 'complihance_policy_acceptances_unique');
+        });
+
+        Schema::create('complihance_cookie_scan_results', function (Blueprint $table) {
+            $table->id();
+
+            $table->string('name')->index();
+            $table->string('domain')->nullable();
+            $table->string('path')->nullable();
+            $table->string('url')->nullable();
+
+            $table->boolean('secure')->default(false);
+            $table->boolean('http_only')->default(false);
+            $table->string('same_site')->nullable();
+            $table->timestamp('expires_at')->nullable();
+
+            $table->timestamps();
+
+            $table->unique(['name', 'domain', 'path'], 'complihance_cookie_scan_unique');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('complihance_cookie_scan_results');
+        Schema::dropIfExists('complihance_policy_acceptances');
+        Schema::dropIfExists('complihance_policies');
+        Schema::dropIfExists('complihance_consents');
+    }
+};

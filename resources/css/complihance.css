@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@source "../views/**/*.blade.php";
+@source "../js/**/*.js";
+
+.complihance-blocked-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--complihance-blocked-content-width, 100%);
+    min-height: var(--complihance-blocked-content-height, 12rem);
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    background: #f9fafb;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.complihance-blocked-content__title {
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+}
+
+.complihance-blocked-content__description {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.complihance-blocked-content__button {
+    margin-top: 1rem;
+    border-radius: 9999px;
+    border: 0;
+    background: #0f172a;
+    color: #ffffff;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.complihance-blocked-content__button:hover {
+    background: #1e293b;
+}
