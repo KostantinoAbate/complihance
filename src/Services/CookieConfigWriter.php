@@ -2,8 +2,6 @@
 
 namespace KostantinoAbate\Complihance\Services;
 
-use Illuminate\Support\Arr;
-
 class CookieConfigWriter
 {
     public function __construct(
@@ -136,7 +134,7 @@ class CookieConfigWriter
             if (is_array($value)) {
                 $output .= "[\n"
                     .$this->exportArrayItems($value, $level + 1)
-                    .$indent."]";
+                    .$indent.']';
             } else {
                 $output .= $this->exportValue($value);
             }

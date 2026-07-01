@@ -2,59 +2,60 @@
 
 namespace KostantinoAbate\Complihance;
 
+use Illuminate\Support\Facades\Blade;
 use KostantinoAbate\Complihance\Commands\ResetCommand;
 use KostantinoAbate\Complihance\Commands\RetentionCommand;
 use KostantinoAbate\Complihance\Commands\ScanCookiesCommand;
+use KostantinoAbate\Complihance\Policies\PolicyManager;
+use KostantinoAbate\Complihance\Services\BannerVisibilityResolver;
+use KostantinoAbate\Complihance\Services\ComplihanceScriptRenderer;
+use KostantinoAbate\Complihance\Services\ConsentModeRenderer;
+use KostantinoAbate\Complihance\Services\PreferencesVisibilityResolver;
+use KostantinoAbate\Complihance\Support\BlockedContentAttributes;
 use KostantinoAbate\Complihance\View\Components\Banner;
 use KostantinoAbate\Complihance\View\Components\CookieTable;
 use KostantinoAbate\Complihance\View\Components\Preferences;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Illuminate\Support\Facades\Blade;
-use KostantinoAbate\Complihance\Services\ConsentModeRenderer;
-use KostantinoAbate\Complihance\Policies\PolicyManager;
-use KostantinoAbate\Complihance\Services\BannerVisibilityResolver;
-use KostantinoAbate\Complihance\Services\PreferencesVisibilityResolver;
-use KostantinoAbate\Complihance\Services\ComplihanceScriptRenderer;
-use KostantinoAbate\Complihance\Support\BlockedContentAttributes;
 
 class ComplihanceServiceProvider extends PackageServiceProvider
 {
     public function packageBooted(): void
     {
         Blade::directive('complihanceBanner', function () {
-            return "<?php if (app(\\" . BannerVisibilityResolver::class . "::class)->shouldShow()) { echo view('complihance::components.banner')->render(); } ?>";
+            return '<?php if (app(\\'.BannerVisibilityResolver::class."::class)->shouldShow()) { echo view('complihance::components.banner')->render(); } ?>";
         });
 
         Blade::directive('complihancePreferences', function () {
-            return "<?php if (app(\\" . PreferencesVisibilityResolver::class . "::class)->shouldShow()) { echo view('complihance::components.preferences')->render(); } ?>";
+            return '<?php if (app(\\'.PreferencesVisibilityResolver::class."::class)->shouldShow()) { echo view('complihance::components.preferences')->render(); } ?>";
         });
 
         Blade::directive('complihanceScript', function () {
-            return "<?php echo app(\\" . ComplihanceScriptRenderer::class . "::class)->render(); ?>";
+            return '<?php echo app(\\'.ComplihanceScriptRenderer::class.'::class)->render(); ?>';
         });
 
         Blade::directive('complihanceConsentMode', function () {
-            return "<?php echo app(\\" . ConsentModeRenderer::class . "::class)->render(); ?>";
+            return '<?php echo app(\\'.ConsentModeRenderer::class.'::class)->render(); ?>';
         });
 
         Blade::directive('complihanceCookieTable', function ($expression) {
             $expression = trim($expression ?: 'null');
+
             return "<?php echo Blade::render('<x-complihance-cookie-table :category=\"\$category\" />', [
                 'category' => {$expression},
             ]); ?>";
         });
 
         Blade::directive('complihanceBlockedContent', function ($expression) {
-            return "<?php echo app(\\" . BlockedContentAttributes::class . "::class)->render({$expression}); ?>";
+            return '<?php echo app(\\'.BlockedContentAttributes::class."::class)->render({$expression}); ?>";
         });
     }
 
     public function packageRegistered(): void
     {
         $this->app->singleton('complihance.policy', function () {
-            return new PolicyManager();
+            return new PolicyManager;
         });
         $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
     }
@@ -74,7 +75,7 @@ class ComplihanceServiceProvider extends PackageServiceProvider
             ->hasAssets()
             ->discoversMigrations()
             ->hasViewComponents('complihance', Banner::class, Preferences::class, CookieTable::class)
-            //->hasTranslations()
+            // ->hasTranslations()
             ->hasCommands(RetentionCommand::class, ScanCookiesCommand::class, ResetCommand::class)
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command

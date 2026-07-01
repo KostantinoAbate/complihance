@@ -4,7 +4,6 @@ namespace KostantinoAbate\Complihance\Services;
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cookie;
 
 class ConsentModeRenderer
 {

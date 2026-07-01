@@ -3,8 +3,8 @@
 namespace KostantinoAbate\Complihance\Support;
 
 use Illuminate\Http\Request;
-use KostantinoAbate\Complihance\Models\Consent;
 use KostantinoAbate\Complihance\Facades\ComplihancePolicy;
+use KostantinoAbate\Complihance\Models\Consent;
 
 class ConsentPayloadBuilder
 {

@@ -17,7 +17,7 @@ class ComplihanceScriptRenderer
         $manifestPath = public_path('vendor/complihance/.vite/manifest.json');
 
         if (app()->environment('local') && $devServer) {
-            return '<script type="module" src="' . e(rtrim($devServer, '/') . '/resources/js/complihance.js') . '"></script>';
+            return '<script type="module" src="'.e(rtrim($devServer, '/').'/resources/js/complihance.js').'"></script>';
         }
 
         if (! file_exists($manifestPath)) {
@@ -39,10 +39,10 @@ class ComplihanceScriptRenderer
         $html = '';
 
         foreach (($entry['css'] ?? []) as $css) {
-            $html .= '<link rel="stylesheet" href="' . e(asset('vendor/complihance/' . $css)) . '">';
+            $html .= '<link rel="stylesheet" href="'.e(asset('vendor/complihance/'.$css)).'">';
         }
 
-        $html .= '<script type="module" src="' . e(asset('vendor/complihance/' . $entry['file'])) . '"></script>';
+        $html .= '<script type="module" src="'.e(asset('vendor/complihance/'.$entry['file'])).'"></script>';
 
         return $html;
     }
