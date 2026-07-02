@@ -115,17 +115,13 @@ return [
             'description' => 'These cookies allow the display of personalized content and advertisements based on user interests and enable measurement of marketing campaign effectiveness.',
             'required' => false,
         ],
-    ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Policy Versioning
-    |--------------------------------------------------------------------------
-    |
-    | Current version of the privacy and cookie policies.
-    |
-    */
-    'policy_version' => env('COMPLIHANCE_POLICY_VERSION', '1.0.0'),
+        'functional' => [
+            'label' => 'Functional cookies',
+            'description' => 'These cookies enable enhanced functionality and personalization, such as remembering user preferences and improving the browsing experience.',
+            'required' => false,
+        ],
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -214,7 +210,9 @@ return [
     | Policy Definitions
     |--------------------------------------------------------------------------
     |
-    | Configure versioned policies and their storage drivers.
+    | Configure the policies managed by Complihance.
+    | Each policy has its own version and can require a renewed acceptance
+    | when the configured version changes.
     |
     */
     'policies' => [

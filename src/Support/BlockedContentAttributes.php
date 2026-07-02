@@ -7,7 +7,7 @@ use Illuminate\Support\HtmlString;
 class BlockedContentAttributes
 {
     public function render(
-        string $category,
+        ?string $category = null,
         ?string $src = null,
         ?string $vendor = null,
         ?string $placeholder = null,
@@ -15,9 +15,14 @@ class BlockedContentAttributes
     ): HtmlString {
         $attributes = [
             'data-complihance-blocked' => true,
-            'data-complihance-category' => $category,
             'data-complihance-inline-consent' => $inlineConsent ? 'true' : 'false',
         ];
+
+        if ($category !== null && $category !== '') {
+            $attributes['data-complihance-category'] = $category;
+        } else {
+            $attributes['data-complihance-requires'] = 'all-optional';
+        }
 
         if ($src !== null && $src !== '') {
             $attributes['data-complihance-src'] = $src;
@@ -33,13 +38,9 @@ class BlockedContentAttributes
 
         return new HtmlString(
             collect($attributes)
-                ->map(function (mixed $value, string $key): string {
-                    if ($value === true) {
-                        return $key;
-                    }
-
-                    return $key.'="'.e((string) $value).'"';
-                })
+                ->map(fn (mixed $value, string $key): string => $value === true
+                    ? $key
+                    : $key.'="'.e((string) $value).'"')
                 ->implode(' ')
         );
     }

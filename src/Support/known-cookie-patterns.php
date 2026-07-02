@@ -2,6 +2,14 @@
 
 return [
     [
+        'pattern' => '/^complihance_anonymous_id$/',
+        'category' => 'necessary',
+        'vendor' => 'Complihance',
+        'duration' => '12 months',
+        'description' => 'Stores an anonymous visitor identifier used to associate consent records across sessions.',
+    ],
+
+    [
         'pattern' => '/^laravel_session$/',
         'category' => 'necessary',
         'vendor' => 'Laravel',
@@ -87,5 +95,29 @@ return [
         'vendor' => 'Microsoft Clarity',
         'duration' => 'Variable',
         'description' => 'Used for website analytics and session recording.',
+    ],
+
+    [
+        'pattern' => '/^language$|^locale$/',
+        'category' => 'functional',
+        'vendor' => 'Application',
+        'duration' => 'Variable',
+        'description' => 'Stores the user language preference.',
+    ],
+
+    [
+        'pattern' => '/^theme$|^appearance$/',
+        'category' => 'functional',
+        'vendor' => 'Application',
+        'duration' => 'Variable',
+        'description' => 'Stores the user interface appearance preference.',
+    ],
+
+    [
+        'pattern' => '/^timezone$/',
+        'category' => 'functional',
+        'vendor' => 'Application',
+        'duration' => 'Variable',
+        'description' => 'Stores the user timezone preference.',
     ],
 ];

@@ -19,13 +19,17 @@ class BrowserCookieScanner
 
             if (! $process->isSuccessful()) {
                 throw new \RuntimeException(
-                    "Browser cookie scanning requires Playwright, Chromium and the required system dependencies.\n\n".
+                    "Browser cookie scanning failed.\n\n".
+                    "Make sure Node.js, Playwright, Chromium and the required system dependencies are installed.\n\n".
                     "Install Playwright in your Laravel application:\n".
                     "npm install -D playwright\n".
                     "npx playwright install chromium\n\n".
                     "In Docker/Linux environments, make sure Chromium system dependencies are installed in the image.\n\n".
                     "Alternatively, run the HTTP-only scanner:\n".
-                    'php artisan complihance:scan-cookies <url> --http-header-only'
+                    "php artisan complihance:scan-cookies <url> --http-header-only\n\n".
+                    "Exit code: {$process->getExitCode()}\n\n".
+                    "STDERR:\n".$process->getErrorOutput()."\n\n".
+                    "STDOUT:\n".$process->getOutput()
                 );
             }
 
@@ -70,6 +74,26 @@ const browser = await chromium.launch({
 
 const context = await browser.newContext();
 const page = await context.newPage();
+const scannedCookies = new Map();
+
+function cookieKey(cookie) {
+    return `\${cookie.name}|\${cookie.domain || ''}|\${cookie.path || '/'}`;
+}
+
+function normalizeCookie(cookie, url) {
+    return {
+        name: cookie.name,
+        domain: cookie.domain || null,
+        path: cookie.path || '/',
+        url,
+        secure: Boolean(cookie.secure),
+        http_only: Boolean(cookie.httpOnly),
+        same_site: cookie.sameSite || null,
+        expires_at: cookie.expires && cookie.expires > 0
+            ? new Date(cookie.expires * 1000).toISOString()
+            : null,
+    };
+}
 
 async function acceptComplihanceConsent(page) {
     const selectors = [
@@ -97,10 +121,16 @@ async function acceptComplihanceConsent(page) {
 }
 
 for (const url of urls) {
-    await page.goto(url, {
-        waitUntil: 'networkidle',
-        timeout: 30000,
-    });
+    try {
+        await page.goto(url, {
+            waitUntil: 'networkidle',
+            timeout: 30000,
+        });
+    } catch (error) {
+        console.error('Failed to scan URL: ' + url);
+        console.error(error.message);
+        process.exit(2);
+    }
 
     await page.waitForTimeout(1000);
 
@@ -108,24 +138,21 @@ for (const url of urls) {
         await acceptComplihanceConsent(page);
         await page.waitForTimeout(2000);
     }
-}
 
-const cookies = await context.cookies();
+    const cookies = await context.cookies();
+
+    cookies.forEach((cookie) => {
+        const key = cookieKey(cookie);
+
+        if (! scannedCookies.has(key)) {
+            scannedCookies.set(key, normalizeCookie(cookie, url));
+        }
+    });
+}
 
 await browser.close();
 
-console.log(JSON.stringify(cookies.map(cookie => ({
-    name: cookie.name,
-    domain: cookie.domain || null,
-    path: cookie.path || '/',
-    url: urls[0] || null,
-    secure: Boolean(cookie.secure),
-    http_only: Boolean(cookie.httpOnly),
-    same_site: cookie.sameSite || null,
-    expires_at: cookie.expires && cookie.expires > 0
-        ? new Date(cookie.expires * 1000).toISOString()
-        : null,
-}))));
+console.log(JSON.stringify(Array.from(scannedCookies.values())));
 JS;
     }
 }

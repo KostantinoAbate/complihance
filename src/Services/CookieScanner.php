@@ -46,9 +46,9 @@ class CookieScanner
 
         $detectedCookieNames = array_unique($detectedCookieNames);
 
-        $addedToConfig = $this->configWriter->addMissingCookies($detectedCookieNames);
-
         $this->configWriter->ensureCoreCookies();
+
+        $addedToConfig = $this->configWriter->addMissingCookies($detectedCookieNames);
 
         return [
             'stored' => $stored,
@@ -66,13 +66,11 @@ class CookieScanner
                 'allow_redirects' => true,
             ])->get($url);
 
-            $setCookies = $response->header('Set-Cookie');
+            $setCookies = $response
+                ->toPsrResponse()
+                ->getHeader('Set-Cookie');
 
-            if (! $setCookies) {
-                continue;
-            }
-
-            foreach ($this->parseSetCookieHeaders((array) $setCookies) as $cookie) {
+            foreach ($this->parseSetCookieHeaders($setCookies) as $cookie) {
                 $cookie['url'] = $url;
                 $cookies[] = $cookie;
             }
@@ -86,56 +84,58 @@ class CookieScanner
         $cookies = [];
 
         foreach ($headers as $header) {
-            foreach (explode(',', $header) as $rawCookie) {
-                $parts = array_map('trim', explode(';', $rawCookie));
-                $nameValue = array_shift($parts);
+            $parts = array_map('trim', explode(';', $header));
+            $nameValue = array_shift($parts);
 
-                if (! str_contains($nameValue, '=')) {
+            if (! str_contains($nameValue, '=')) {
+                continue;
+            }
+
+            [$name] = explode('=', $nameValue, 2);
+
+            $cookie = [
+                'name' => $name,
+                'domain' => null,
+                'path' => '/',
+                'secure' => false,
+                'http_only' => false,
+                'same_site' => null,
+                'expires_at' => null,
+            ];
+
+            foreach ($parts as $part) {
+                if (strtolower($part) === 'secure') {
+                    $cookie['secure'] = true;
+
                     continue;
                 }
 
-                [$name] = explode('=', $nameValue, 2);
+                if (strtolower($part) === 'httponly') {
+                    $cookie['http_only'] = true;
 
-                $cookie = [
-                    'name' => $name,
-                    'domain' => null,
-                    'path' => '/',
-                    'secure' => false,
-                    'http_only' => false,
-                    'same_site' => null,
-                    'expires_at' => null,
-                ];
-
-                foreach ($parts as $part) {
-                    if (strtolower($part) === 'secure') {
-                        $cookie['secure'] = true;
-
-                        continue;
-                    }
-
-                    if (strtolower($part) === 'httponly') {
-                        $cookie['http_only'] = true;
-
-                        continue;
-                    }
-
-                    if (! str_contains($part, '=')) {
-                        continue;
-                    }
-
-                    [$key, $value] = explode('=', $part, 2);
-
-                    match (strtolower($key)) {
-                        'domain' => $cookie['domain'] = $value,
-                        'path' => $cookie['path'] = $value,
-                        'samesite' => $cookie['same_site'] = $value,
-                        'expires' => $cookie['expires_at'] = rescue(fn () => now()->parse($value), null, false),
-                        default => null,
-                    };
+                    continue;
                 }
 
-                $cookies[] = $cookie;
+                if (! str_contains($part, '=')) {
+                    continue;
+                }
+
+                [$key, $value] = explode('=', $part, 2);
+
+                match (strtolower($key)) {
+                    'domain' => $cookie['domain'] = $value,
+                    'path' => $cookie['path'] = $value,
+                    'samesite' => $cookie['same_site'] = $value,
+                    'expires' => $cookie['expires_at'] = rescue(
+                        fn () => now()->parse($value),
+                        null,
+                        false
+                    ),
+                    default => null,
+                };
             }
+
+            $cookies[] = $cookie;
         }
 
         return $cookies;

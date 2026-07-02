@@ -1,5 +1,5 @@
 (function () {
-    const defaultConfig = {
+    const defaultOptions = {
         apiBaseUrl: '/complihance/api',
         csrfToken: document
             .querySelector('meta[name="csrf-token"]')
@@ -8,27 +8,27 @@
 
     const state = {
         consent: null,
-        loaded: false,
+        consentLoaded: false,
+        consentPromise: null,
+
+        configuration: null,
+        configurationPromise: null,
+
         callbacks: [],
-        config: {
-            ...defaultConfig,
+
+        options: {
+            ...defaultOptions,
             ...(window.ComplihanceConfig || {}),
         },
     };
 
     function apiUrl(path) {
-        const baseUrl = state.config.apiBaseUrl || '/complihance/api';
+        const baseUrl = state.options.apiBaseUrl || '/complihance/api';
 
         return `${baseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
     }
 
     async function request(path, options = {}) {
-        console.log('[Complihance request]', {
-            path,
-            apiBaseUrl: state.config.apiBaseUrl,
-            finalUrl: apiUrl(path),
-        });
-
         const response = await fetch(apiUrl(path), {
             credentials: 'same-origin',
             redirect: 'manual',
@@ -36,8 +36,8 @@
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                ...(state.config.csrfToken
-                    ? { 'X-CSRF-TOKEN': state.config.csrfToken }
+                ...(state.options.csrfToken
+                    ? { 'X-CSRF-TOKEN': state.options.csrfToken }
                     : {}),
                 ...(options.headers || {}),
             },
@@ -46,6 +46,7 @@
 
         if (!response.ok) {
             const error = new Error('Complihance API request failed');
+
             error.status = response.status;
             error.response = response;
 
@@ -53,15 +54,6 @@
         }
 
         return response.json();
-    }
-
-    function setConsent(payload) {
-        state.consent = payload;
-        state.loaded = true;
-
-        dispatchConsentChanged(payload);
-
-        return payload;
     }
 
     function dispatchConsentChanged(payload = state.consent) {
@@ -76,15 +68,32 @@
         });
     }
 
-    async function refreshConsent() {
-        const payload = await request('/consent');
+    function setConsent(payload) {
+        state.consent = payload;
+        state.consentLoaded = true;
 
-        return setConsent(payload);
+        dispatchConsentChanged(payload);
+
+        return payload;
+    }
+
+    async function refreshConsent() {
+        state.consentPromise = request('/consent')
+            .then((payload) => setConsent(payload))
+            .finally(() => {
+                state.consentPromise = null;
+            });
+
+        return state.consentPromise;
     }
 
     async function getConsent() {
-        if (state.loaded) {
+        if (state.consentLoaded) {
             return state.consent;
+        }
+
+        if (state.consentPromise) {
+            return state.consentPromise;
         }
 
         return refreshConsent();
@@ -92,6 +101,32 @@
 
     function getConsentSync() {
         return state.consent;
+    }
+
+    async function getConfiguration() {
+        if (state.configuration) {
+            return state.configuration;
+        }
+
+        if (state.configurationPromise) {
+            return state.configurationPromise;
+        }
+
+        state.configurationPromise = request('/configuration')
+            .then((configuration) => {
+                state.configuration = configuration;
+
+                return configuration;
+            })
+            .finally(() => {
+                state.configurationPromise = null;
+            });
+
+        return state.configurationPromise;
+    }
+
+    function getConfigurationSync() {
+        return state.configuration;
     }
 
     function hasConsent() {
@@ -106,7 +141,7 @@
         return state.consent?.consent?.accepted_categories || [];
     }
 
-    function vendors() {
+    function acceptedVendors() {
         return state.consent?.consent?.vendors || {};
     }
 
@@ -115,13 +150,13 @@
     }
 
     function hasVendor(vendor) {
-        const selectedVendors = vendors();
+        const vendors = acceptedVendors();
 
-        if (Array.isArray(selectedVendors)) {
-            return selectedVendors.includes(vendor);
+        if (Array.isArray(vendors)) {
+            return vendors.includes(vendor);
         }
 
-        return selectedVendors[vendor] === true;
+        return vendors[vendor] === true;
     }
 
     function canUse(category) {
@@ -130,6 +165,27 @@
 
     function canUseVendor(vendor) {
         return hasConsent() && !requiresRenewal() && hasVendor(vendor);
+    }
+
+    function optionalCategories() {
+        return state.configuration?.categories
+            ?.filter((category) => category.required !== true)
+            ?.map((category) => category.key)
+            ?.filter(Boolean) || [];
+    }
+
+    function canUseAllOptionalCategories() {
+        if (!hasConsent() || requiresRenewal()) {
+            return false;
+        }
+
+        const categories = optionalCategories();
+
+        if (!categories.length) {
+            return false;
+        }
+
+        return categories.every((category) => hasCategory(category));
     }
 
     async function savePreferences(preferences) {
@@ -162,41 +218,37 @@
             ...payload,
         };
 
+        state.consentLoaded = true;
+
         dispatchConsentChanged(state.consent);
 
         return state.consent;
     }
 
     async function acceptAll() {
-        const configuration = await request('/configuration');
-
-        const categories = configuration.categories
-            .map((category) => category.key)
-            .filter(Boolean);
-
-        const vendorPreferences = configuration.vendors
-            .map((vendor) => vendor.key)
-            .filter(Boolean);
+        const configuration = await getConfiguration();
 
         return savePreferences({
-            categories,
-            vendors: vendorPreferences,
+            categories: configuration.categories
+                .map((category) => category.key)
+                .filter(Boolean),
+
+            vendors: configuration.vendors
+                .map((vendor) => vendor.key)
+                .filter(Boolean),
         });
     }
 
     async function rejectAll() {
-        const configuration = await request('/configuration');
-
-        const categories = configuration.categories
-            .filter((category) => category.required === true)
-            .map((category) => category.key)
-            .filter(Boolean);
-
-        const vendorPreferences = [];
+        const configuration = await getConfiguration();
 
         return savePreferences({
-            categories,
-            vendors: vendorPreferences,
+            categories: configuration.categories
+                .filter((category) => category.required === true)
+                .map((category) => category.key)
+                .filter(Boolean),
+
+            vendors: [],
         });
     }
 
@@ -207,24 +259,28 @@
 
         state.callbacks.push(callback);
 
-        if (state.loaded) {
+        if (state.consentLoaded) {
             callback(state.consent);
         }
     }
 
     window.Complihance = {
+        ...(window.Complihance || {}),
+
         getConsent,
         getConsentSync,
         refreshConsent,
 
+        getConfiguration,
+        getConfigurationSync,
+
         hasConsent,
         requiresRenewal,
-
         hasCategory,
         hasVendor,
-
         canUse,
         canUseVendor,
+        canUseAllOptionalCategories,
 
         savePreferences,
         updatePreferences,
@@ -239,6 +295,10 @@
     };
 
     refreshConsent().catch(() => {
-        state.loaded = true;
+        state.consentLoaded = true;
+    });
+
+    getConfiguration().catch(() => {
+        state.configuration = null;
     });
 })();

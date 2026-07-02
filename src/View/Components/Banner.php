@@ -3,17 +3,20 @@
 namespace KostantinoAbate\Complihance\View\Components;
 
 use Illuminate\View\Component;
-use Illuminate\View\View;
+use KostantinoAbate\Complihance\Services\BannerVisibilityResolver;
 
 class Banner extends Component
 {
+    public function __construct(
+        protected BannerVisibilityResolver $visibilityResolver,
+    ) {}
+
     public function shouldRender(): bool
     {
-        return config('complihance.banner.enabled', true)
-            && ! request()->cookies->has(config('complihance.cookie_name', 'complihance_consent'));
+        return $this->visibilityResolver->shouldShow();
     }
 
-    public function render(): View
+    public function render()
     {
         return view('complihance::components.banner');
     }

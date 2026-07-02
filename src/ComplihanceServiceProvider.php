@@ -48,6 +48,12 @@ class ComplihanceServiceProvider extends PackageServiceProvider
         });
 
         Blade::directive('complihanceBlockedContent', function ($expression) {
+            $expression = trim($expression ?: '');
+
+            if ($expression === '') {
+                return '<?php echo app(\\'.BlockedContentAttributes::class.'::class)->render(); ?>';
+            }
+
             return '<?php echo app(\\'.BlockedContentAttributes::class."::class)->render({$expression}); ?>";
         });
     }
@@ -75,7 +81,7 @@ class ComplihanceServiceProvider extends PackageServiceProvider
             ->hasAssets()
             ->discoversMigrations()
             ->hasViewComponents('complihance', Banner::class, Preferences::class, CookieTable::class)
-            // ->hasTranslations()
+            ->hasTranslations()
             ->hasCommands(RetentionCommand::class, ScanCookiesCommand::class, ResetCommand::class)
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
