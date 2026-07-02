@@ -3,6 +3,7 @@
 namespace KostantinoAbate\Complihance\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\File;
 use KostantinoAbate\Complihance\ComplihanceServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
@@ -26,12 +27,12 @@ class TestCase extends Orchestra
 
     public function getEnvironmentSetUp($app)
     {
+        config()->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
+
         config()->set('database.default', 'testing');
 
-        /*
-         foreach (\Illuminate\Support\Facades\File::allFiles(__DIR__ . '/../database/migrations') as $migration) {
+        foreach (File::allFiles(__DIR__.'/../database/migrations') as $migration) {
             (include $migration->getRealPath())->up();
-         }
-         */
+        }
     }
 }

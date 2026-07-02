@@ -159,11 +159,12 @@
             has_consent: false,
             requires_renewal: true,
             consent: null,
+            ...payload,
         };
 
         dispatchConsentChanged(state.consent);
 
-        return payload;
+        return state.consent;
     }
 
     async function acceptAll() {

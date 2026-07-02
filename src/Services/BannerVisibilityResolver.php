@@ -6,23 +6,24 @@ use KostantinoAbate\Complihance\Facades\ComplihancePolicy;
 
 class BannerVisibilityResolver
 {
+    public function __construct(
+        protected CurrentConsentResolver $currentConsentResolver,
+    ) {
+    }
+
     public function shouldShow(): bool
     {
         if (! config('complihance.banner.enabled', true)) {
             return false;
         }
 
-        $cookie = request()->cookies->get(
-            config('complihance.cookie_name', 'complihance_consent')
-        );
+        $decodedConsent = $this->decodedConsentCookie();
 
-        if (! $cookie) {
+        if (! $decodedConsent) {
             return true;
         }
 
-        $decodedConsent = json_decode($cookie, true);
-
-        if (! is_array($decodedConsent)) {
+        if (! $this->currentConsentResolver->hasActiveConsent($decodedConsent)) {
             return true;
         }
 
@@ -30,16 +31,31 @@ class BannerVisibilityResolver
             || $this->cookieConfigurationChanged($decodedConsent);
     }
 
+    protected function decodedConsentCookie(): ?array
+    {
+        $cookie = request()->cookies->get(
+            config('complihance.cookie_name', 'complihance_consent')
+        );
+
+        if (! $cookie) {
+            return null;
+        }
+
+        $decodedConsent = json_decode($cookie, true);
+
+        return is_array($decodedConsent) ? $decodedConsent : null;
+    }
+
     protected function cookiePolicyRequiresAcceptance(): bool
     {
-        return ComplihancePolicy::requiresAcceptance(
-            key: 'cookie'
-        );
+        return ComplihancePolicy::requiresAcceptance('cookie');
     }
 
     protected function cookieConfigurationChanged(array $decodedConsent): bool
     {
-        $currentCookieConfigurationVersion = config('complihance.cookie_configuration_version');
+        $currentCookieConfigurationVersion = config(
+            'complihance.cookie_configuration_version'
+        );
 
         $acceptedCookieConfigurationVersion = $decodedConsent['cookie_configuration_version'] ?? null;
 

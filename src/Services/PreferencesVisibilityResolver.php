@@ -4,14 +4,17 @@ namespace KostantinoAbate\Complihance\Services;
 
 class PreferencesVisibilityResolver
 {
+    public function __construct(
+        protected CurrentConsentResolver $currentConsentResolver,
+    ) {
+    }
+
     public function shouldShow(): bool
     {
         if (! config('complihance.banner.enabled', true)) {
             return false;
         }
 
-        return request()->cookies->has(
-            config('complihance.cookie_name', 'complihance_consent')
-        );
+        return $this->currentConsentResolver->resolveFromCookie() !== null;
     }
 }
