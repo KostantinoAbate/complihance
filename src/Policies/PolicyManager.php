@@ -94,21 +94,35 @@ class PolicyManager
         }
 
         if ($subject) {
-            $query
+            return $query
                 ->where('subject_type', $subject->getMorphClass())
-                ->where('subject_id', $subject->getKey());
-        } else {
-            $query->where(function ($query) {
-                $query
-                    ->where('anonymous_id', request()->cookie(
-                        config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
-                    ))
-                    ->orWhere('session_id', request()->hasSession()
-                        ? request()->session()->getId()
-                        : null
-                    );
-            });
+                ->where('subject_id', $subject->getKey())
+                ->exists();
         }
+
+        $anonymousId = request()->cookie(
+            config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
+        );
+
+        $sessionId = request()->hasSession()
+            ? request()->session()->getId()
+            : null;
+
+        if (! $anonymousId && ! $sessionId) {
+            return false;
+        }
+
+        $query->where(function ($query) use ($anonymousId, $sessionId) {
+            if ($anonymousId) {
+                $query->where('anonymous_id', $anonymousId);
+            }
+
+            if ($sessionId) {
+                $method = $anonymousId ? 'orWhere' : 'where';
+
+                $query->{$method}('session_id', $sessionId);
+            }
+        });
 
         return $query->exists();
     }

@@ -30,12 +30,7 @@ class ConsentApiController extends Controller
         ConsentPayloadBuilder $builder,
         CurrentConsentResolver $resolver,
     ): JsonResponse {
-        return response()->json(
-            $builder->build(
-                $resolver->resolve($request),
-                $request,
-            )
-        );
+        return $this->show($request, $builder, $resolver);
     }
 
     public function store(
