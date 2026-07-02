@@ -116,4 +116,19 @@
             {{ $texts['preferences']['saved'] ?? 'Preferenze aggiornate correttamente.' }}
         </p>
     </form>
+
+    <p
+        data-complihance-preferences-feedback
+        class="mt-3 hidden text-sm text-green-700"
+    >
+        {{ $texts['preferences']['saved'] ?? 'Preferenze aggiornate correttamente.' }}
+    </p>
+
+    <button
+        type="button"
+        data-complihance-revoke
+        class="mt-4 rounded-lg bg-red-800 px-4 py-2 text-sm font-semibold text-red-50 hover:bg-red-700"
+    >
+        {{ $texts['preferences']['revoke'] ?? 'Revoca consenso' }}
+    </button>
 </div>

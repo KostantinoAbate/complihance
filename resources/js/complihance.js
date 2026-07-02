@@ -336,6 +336,10 @@ import '../css/complihance.css';
             }));
         };
 
+        function forgetCookie(name) {
+            document.cookie = `${name}=; Max-Age=0; path=/`;
+        }
+
         form.querySelectorAll('[data-complihance-category]').forEach((categoryInput) => {
             syncCategoryFromVendors(form, categoryInput);
 
@@ -392,6 +396,17 @@ import '../css/complihance.css';
             });
 
             saveConsent();
+        });
+
+        document.querySelectorAll('[data-complihance-revoke]').forEach((button) => {
+            button.addEventListener('click', async () => {
+                await window.Complihance.revoke();
+
+                forgetCookie('complihance_consent');
+                forgetCookie('complihance_anonymous_id');
+
+                window.location.href = window.ComplihanceConfig?.afterRevokeRedirectUrl || '/';
+            });
         });
     }
 
