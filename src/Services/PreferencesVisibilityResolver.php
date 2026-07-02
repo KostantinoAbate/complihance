@@ -6,8 +6,7 @@ class PreferencesVisibilityResolver
 {
     public function __construct(
         protected CurrentConsentResolver $currentConsentResolver,
-    ) {
-    }
+    ) {}
 
     public function shouldShow(): bool
     {

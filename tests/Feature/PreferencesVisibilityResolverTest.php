@@ -1,10 +1,11 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use KostantinoAbate\Complihance\Models\Consent;
 use KostantinoAbate\Complihance\Services\PreferencesVisibilityResolver;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 it('does not show preferences when consent cookie is missing', function () {
     Config::set('complihance.banner.enabled', true);
