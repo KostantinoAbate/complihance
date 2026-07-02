@@ -22,7 +22,7 @@ class ConsentPayloadBuilder
     protected function consentData(Consent $consent): array
     {
         return [
-            'uuid' => $consent->consent_uuid,
+            'consent_uuid' => $consent->consent_uuid,
             'accepted_categories' => $consent->accepted_categories ?? [],
             'rejected_categories' => $consent->rejected_categories ?? [],
             'vendors' => $consent->vendors ?? [],

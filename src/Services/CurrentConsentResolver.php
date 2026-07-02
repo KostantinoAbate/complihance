@@ -34,21 +34,38 @@ class CurrentConsentResolver
             }
         }
 
+        if (auth()->check()) {
+            return Consent::query()
+                ->whereNull('revoked_at')
+                ->whereMorphedTo('subject', auth()->user())
+                ->latest('accepted_at')
+                ->first();
+        }
+
+        $anonymousId = $request->cookie(
+            config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
+        );
+
+        $sessionId = $request->hasSession()
+            ? $request->session()->getId()
+            : null;
+
+        if (! $anonymousId && ! $sessionId) {
+            return null;
+        }
+
         return Consent::query()
             ->whereNull('revoked_at')
-            ->when(auth()->check(), function ($query) {
-                $query->whereMorphedTo(
-                    'subject',
-                    auth()->user()
-                );
-            })
-            ->when(! auth()->check(), function ($query) use ($request) {
-                $query->where(
-                    'session_id',
-                    $request->hasSession()
-                        ? $request->session()->getId()
-                        : null
-                );
+            ->where(function ($query) use ($anonymousId, $sessionId) {
+                if ($anonymousId) {
+                    $query->where('anonymous_id', $anonymousId);
+                }
+
+                if ($sessionId) {
+                    $method = $anonymousId ? 'orWhere' : 'where';
+
+                    $query->{$method}('session_id', $sessionId);
+                }
             })
             ->latest('accepted_at')
             ->first();

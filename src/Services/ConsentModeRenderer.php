@@ -28,10 +28,14 @@ class ConsentModeRenderer
             $decoded = json_decode($cookie, true);
 
             if (is_array($decoded)) {
-                $categories = $decoded['categories'] ?? [];
+                $categories = $decoded['accepted_categories']
+                    ?? $decoded['categories']
+                    ?? [];
 
                 if (is_array($categories)) {
-                    $currentConsentMode = $this->consentMode->fromCategories($categories);
+                    $currentConsentMode = $this->consentMode->fromCategories(
+                        array_values(array_unique($categories))
+                    );
                 }
             }
         }

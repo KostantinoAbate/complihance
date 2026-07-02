@@ -83,7 +83,7 @@ return new class extends Migration
                 'policy_key',
                 'policy_version',
                 'source',
-            ], 'complihance_policy_acceptances_unique');
+            ], 'complihance_policy_acceptances_lookup');
         });
 
         Schema::create('complihance_cookie_scan_results', function (Blueprint $table) {

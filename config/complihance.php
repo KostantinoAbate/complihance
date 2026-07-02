@@ -10,7 +10,7 @@ return [
     | Name of the cookie used to persist the user's consent preferences.
     |
     */
-    'cookie_name' => 'complihance_consent',
+    'cookie_name' => env('COMPLIHANCE_COOKIE_NAME', 'complihance_consent'),
 
     /*
     |--------------------------------------------------------------------------
@@ -18,10 +18,10 @@ return [
     |--------------------------------------------------------------------------
     |
     | Lifetime of the consent cookie expressed in minutes.
-    | Default: 180 days.
+    | Default: 12 months.
     |
     */
-    'cookie_lifetime' => 60 * 24 * 180,
+    'cookie_lifetime' => env('COMPLIHANCE_COOKIE_LIFETIME', 60 * 24 * 365),
 
     /*
     |--------------------------------------------------------------------------
@@ -32,10 +32,10 @@ return [
     |
     */
     'routes' => [
-        'prefix' => 'complihance',
+        'prefix' => env('COMPLIHANCE_ROUTE_PREFIX', 'complihance'),
         'middleware' => ['web'],
 
-        'api_prefix' => 'complihance/api',
+        'api_prefix' => env('COMPLIHANCE_API_ROUTE_PREFIX', 'complihance/api'),
         'api_middleware' => ['web'],
     ],
 
@@ -48,7 +48,7 @@ return [
     |
     */
     'banner' => [
-        'enabled' => true,
+        'enabled' => env('COMPLIHANCE_BANNER_ENABLED', true),
     ],
 
     /*
@@ -69,7 +69,7 @@ return [
         ],
 
         'cookie_policy_label' => 'Cookie Policy',
-        'cookie_policy_url' => '/cookie-policy',
+        'cookie_policy_url' => env('COMPLIHANCE_COOKIE_POLICY_URL', '/cookie-policy'),
 
         'actions' => [
             'save' => 'Save preferences',
@@ -149,7 +149,10 @@ return [
     | Cookie used to identify anonymous visitors across sessions.
     |
     */
-    'anonymous_cookie_name' => 'complihance_anonymous_id',
+    'anonymous_cookie_name' => env(
+        'COMPLIHANCE_ANONYMOUS_COOKIE_NAME',
+        'complihance_anonymous_id'
+    ),
 
     /*
     |--------------------------------------------------------------------------
@@ -160,7 +163,7 @@ return [
     |
     */
     'consent_mode' => [
-        'enabled' => true,
+        'enabled' => env('COMPLIHANCE_CONSENT_MODE_ENABLED', true),
 
         'default' => [
             'ad_storage' => 'denied',
@@ -203,7 +206,7 @@ return [
     |
     */
     'granular_consent' => [
-        'enabled' => false,
+        'enabled' => env('COMPLIHANCE_GRANULAR_CONSENT_ENABLED', false),
     ],
 
     /*
@@ -252,16 +255,10 @@ return [
     |
     */
     'retention' => [
-        'enabled' => true,
-
-        'consent_retention_months' => 12,
-
-        /*
-         * Supported values: anonymize, delete
-         */
-        'expired_action' => 'anonymize',
-
-        'chunk_size' => 100,
+        'enabled' => env('COMPLIHANCE_RETENTION_ENABLED', true),
+        'consent_retention_months' => env('COMPLIHANCE_CONSENT_RETENTION_MONTHS', 12),
+        'expired_action' => env('COMPLIHANCE_EXPIRED_CONSENTS_ACTION', 'anonymize'), //Supported values: anonymize, delete
+        'chunk_size' => env('COMPLIHANCE_RETENTION_CHUNK_SIZE', 100),
     ],
 
     /*
@@ -274,7 +271,7 @@ return [
     |
     */
     'blocked_content' => [
-        'inline_consent' => true,
+        'inline_consent' => env('COMPLIHANCE_BLOCKED_CONTENT_INLINE_CONSENT', true),
 
         'placeholders' => [
             'default' => [
