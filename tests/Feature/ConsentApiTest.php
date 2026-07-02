@@ -21,7 +21,8 @@ it('revokes consent and forgets consent cookies', function () {
     ]);
 
     Route::delete('/test-complihance/revoke', function (Request $request) use ($consent) {
-        $controller = new class($consent) extends ConsentApiController {
+        $controller = new class($consent) extends ConsentApiController
+        {
             public function __construct(private Consent $testConsent) {}
 
             protected function currentConsent(Request $request): ?Consent
