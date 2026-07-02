@@ -54,11 +54,15 @@ class StoreConsentAction
             ->values()
             ->all();
 
+        $sessionId = $request->hasSession() ? $request->session()->getId() : null;
         $anonymousId = $request->cookie(config('complihance.anonymous_cookie_name', 'complihance_anonymous_id'))
             ?? (string) Str::uuid();
 
+        $ipAddress = $request->ip();
+        $userAgent = $request->userAgent();
+
         $consentData = [
-            'session_id' => $request->hasSession() ? $request->session()->getId() : null,
+            'session_id' => $sessionId,
             'anonymous_id' => $anonymousId,
 
             'subject_type' => auth()->check() ? auth()->user()::class : null,
@@ -70,8 +74,8 @@ class StoreConsentAction
             'policy_version' => ComplihancePolicy::currentVersion('cookie'),
             'cookie_configuration_version' => config('complihance.cookie_configuration_version'),
 
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
+            'ip_address' => $ipAddress,
+            'user_agent' => $userAgent,
 
             'accepted_at' => now(),
         ];
@@ -87,6 +91,10 @@ class StoreConsentAction
             subject: auth()->check() ? auth()->user() : null,
             source: 'cookie_banner',
             consentId: $consent->id,
+            anonymousId: $anonymousId,
+            sessionId: $sessionId,
+            ipAddress: $ipAddress,
+            userAgent: $userAgent,
             metadata: [
                 'accepted_categories' => $acceptedCategories,
                 'rejected_categories' => $rejectedCategories,

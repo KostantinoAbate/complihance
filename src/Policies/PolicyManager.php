@@ -43,6 +43,10 @@ class PolicyManager
         mixed $subject = null,
         ?string $source = null,
         ?int $consentId = null,
+        ?string $anonymousId = null,
+        ?string $sessionId = null,
+        ?string $ipAddress = null,
+        ?string $userAgent = null,
         array $metadata = [],
     ): ComplihancePolicyAcceptance {
         $policy = $this->get($key);
@@ -53,12 +57,12 @@ class PolicyManager
             'subject_type' => $subject ? $subject->getMorphClass() : null,
             'subject_id' => $subject?->getKey(),
 
-            'session_id' => request()->hasSession()
-                ? request()->session()->getId()
-                : null,
+            'session_id' => $sessionId ?? (
+                request()->hasSession() ? request()->session()->getId() : null
+            ),
 
-            'anonymous_id' => request()->cookie(
-                config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
+            'anonymous_id' => $anonymousId ?? request()->cookie(
+                    config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
             ),
 
             'policy_key' => $policy->key,
@@ -67,8 +71,8 @@ class PolicyManager
             'source' => $source ?? 'custom_form',
             'metadata' => $metadata,
 
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
+            'ip_address' => $ipAddress ?? request()->ip(),
+            'user_agent' => $userAgent ?? request()->userAgent(),
 
             'accepted_at' => now(),
         ]);
