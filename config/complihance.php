@@ -255,7 +255,7 @@ return [
     'retention' => [
         'enabled' => env('COMPLIHANCE_RETENTION_ENABLED', true),
         'consent_retention_months' => env('COMPLIHANCE_CONSENT_RETENTION_MONTHS', 12),
-        'expired_action' => env('COMPLIHANCE_EXPIRED_CONSENTS_ACTION', 'anonymize'), //Supported values: anonymize, delete
+        'expired_action' => env('COMPLIHANCE_EXPIRED_CONSENTS_ACTION', 'anonymize'), // Supported values: anonymize, delete
         'chunk_size' => env('COMPLIHANCE_RETENTION_CHUNK_SIZE', 100),
     ],
 
