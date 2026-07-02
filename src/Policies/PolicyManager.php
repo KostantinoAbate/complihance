@@ -62,7 +62,7 @@ class PolicyManager
             ),
 
             'anonymous_id' => $anonymousId ?? request()->cookie(
-                    config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
+                config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
             ),
 
             'policy_key' => $policy->key,
