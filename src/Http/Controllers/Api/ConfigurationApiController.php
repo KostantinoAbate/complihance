@@ -5,7 +5,6 @@ namespace KostantinoAbate\Complihance\Http\Controllers\Api;
 use Illuminate\Routing\Controller;
 use KostantinoAbate\Complihance\Facades\ComplihancePolicy;
 use KostantinoAbate\Complihance\Services\ComplihanceDataRepository;
-use KostantinoAbate\Complihance\Support\GranularConsent;
 
 class ConfigurationApiController extends Controller
 {
@@ -24,11 +23,9 @@ class ConfigurationApiController extends Controller
                 ? $data->vendors()
                 : [],
 
-            'cookie_policy_version' =>
-                ComplihancePolicy::currentVersion('cookie'),
+            'cookie_policy_version' => ComplihancePolicy::currentVersion('cookie'),
 
-            'cookie_configuration_version' =>
-                config('complihance.cookie_configuration_version'),
+            'cookie_configuration_version' => config('complihance.cookie_configuration_version'),
         ]);
     }
 }
