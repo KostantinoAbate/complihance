@@ -10,8 +10,11 @@ use KostantinoAbate\Complihance\Services\ComplihanceDataRepository;
 class Banner extends Component
 {
     public array $texts;
+
     public array $categories;
+
     public bool $granularConsentEnabled;
+
     public array $vendorsByCategory;
 
     public function __construct(
@@ -29,6 +32,7 @@ class Banner extends Component
                 if (! $categoryKey) {
                     return false;
                 }
+
                 return ! (bool) ($this->categories[$categoryKey]['required'] ?? false);
             })
             ->groupBy('category')
