@@ -4,32 +4,31 @@ namespace KostantinoAbate\Complihance\Http\Controllers\Api;
 
 use Illuminate\Routing\Controller;
 use KostantinoAbate\Complihance\Facades\ComplihancePolicy;
+use KostantinoAbate\Complihance\Services\ComplihanceDataRepository;
 use KostantinoAbate\Complihance\Support\GranularConsent;
 
 class ConfigurationApiController extends Controller
 {
-    public function show()
+    public function show(ComplihanceDataRepository $data)
     {
         return response()->json([
-            'categories' => collect(config('complihance.categories', []))
-                ->map(fn (array $category, string $key) => [
-                    'key' => $key,
-                    ...$category,
-                ])
-                ->values(),
+            'locale' => app()->getLocale(),
 
-            'vendors' => collect(GranularConsent::vendors())
-                ->map(fn (array $vendor, string $key) => [
-                    'key' => $key,
-                    ...$vendor,
-                ])
-                ->values(),
+            'texts' => $data->texts(),
 
-            'cookie_policy_version' => ComplihancePolicy::currentVersion('cookie'),
+            'categories' => $data->categories(),
 
-            'cookie_configuration_version' => config(
-                'complihance.cookie_configuration_version'
-            ),
+            'cookies' => $data->cookies(),
+
+            'vendors' => config('complihance.granular_consent.enabled')
+                ? $data->vendors()
+                : [],
+
+            'cookie_policy_version' =>
+                ComplihancePolicy::currentVersion('cookie'),
+
+            'cookie_configuration_version' =>
+                config('complihance.cookie_configuration_version'),
         ]);
     }
 }

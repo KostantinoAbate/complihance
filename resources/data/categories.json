@@ -1,0 +1,73 @@
+{
+    "necessary": {
+        "required": true,
+        "enabled": true,
+        "consent_mode": [
+            "security_storage"
+        ],
+        "translations": {
+            "en": {
+                "label": "Strictly necessary cookies",
+                "description": "Strictly necessary cookies are essential to ensure the proper functioning and security of the website."
+            },
+            "it": {
+                "label": "Cookie strettamente necessari",
+                "description": "I cookie strettamente necessari sono essenziali per garantire il corretto funzionamento e la sicurezza del sito."
+            }
+        }
+    },
+    "analytics": {
+        "required": false,
+        "enabled": true,
+        "consent_mode": [
+            "analytics_storage"
+        ],
+        "translations": {
+            "en": {
+                "label": "Analytics and performance cookies",
+                "description": "These cookies allow the collection of information, including aggregated data, about user behavior during browsing."
+            },
+            "it": {
+                "label": "Cookie analytics e prestazioni",
+                "description": "Questi cookie consentono la raccolta di informazioni, anche aggregate, sul comportamento degli utenti durante la navigazione."
+            }
+        }
+    },
+    "marketing": {
+        "required": false,
+        "enabled": true,
+        "consent_mode": [
+            "ad_storage",
+            "ad_user_data",
+            "ad_personalization"
+        ],
+        "translations": {
+            "en": {
+                "label": "Marketing cookies",
+                "description": "These cookies allow the display of personalized content and advertisements based on user interests and enable measurement of marketing campaign effectiveness."
+            },
+            "it": {
+                "label": "Cookie marketing",
+                "description": "Questi cookie permettono di mostrare contenuti e annunci personalizzati in base agli interessi dell’utente e di misurare l’efficacia delle campagne marketing."
+            }
+        }
+    },
+    "functional": {
+        "required": false,
+        "enabled": true,
+        "consent_mode": [
+            "functionality_storage",
+            "personalization_storage"
+        ],
+        "translations": {
+            "en": {
+                "label": "Functional cookies",
+                "description": "These cookies enable enhanced functionality and personalization, such as remembering user preferences and improving the browsing experience."
+            },
+            "it": {
+                "label": "Cookie funzionali",
+                "description": "Questi cookie abilitano funzionalità avanzate e personalizzazioni, come il ricordo delle preferenze dell’utente e il miglioramento dell’esperienza di navigazione."
+            }
+        }
+    }
+}

@@ -53,74 +53,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Banner Texts
+    | Data sources & localization
     |--------------------------------------------------------------------------
     |
-    | Texts used by the default consent banner views.
+    | Define where to find categories & cookies source
     |
     */
-    'texts' => [
-        'eyebrow' => 'Your cookie preferences.',
-        'title' => 'Personalized experiences with full control',
+    'data' => [
+        'categories_path' => env(
+            'COMPLIHANCE_CATEGORIES_PATH',
+            resource_path('vendor/complihance/categories.json')
+        ),
 
-        'description' => [
-            'This website uses analytics and tracking cookies, as well as similar technologies. By consenting to the use of cookies and the related processing of personal data, you allow us to analyze the content you view and enable us to display advertisements tailored to your interests.',
-            'You can provide consent by clicking "Accept all", selecting your individual preferences, or rejecting cookies by using the dedicated button and closing the banner. You have the right to withdraw your consent at any time.',
-        ],
+        'cookies_path' => env(
+            'COMPLIHANCE_COOKIES_PATH',
+            resource_path('vendor/complihance/cookies.json')
+        ),
 
-        'cookie_policy_label' => 'Cookie Policy',
-        'cookie_policy_url' => env('COMPLIHANCE_COOKIE_POLICY_URL', '/cookie-policy'),
+        'texts_path' => env(
+            'COMPLIHANCE_TEXTS_PATH',
+            resource_path('vendor/complihance/texts.json')
+        ),
 
-        'actions' => [
-            'save' => 'Save preferences',
-            'reject' => 'Reject all',
-            'accept_all' => 'Accept all',
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Consent Categories
-    |--------------------------------------------------------------------------
-    |
-    | Configure the available consent categories exposed by the package.
-    |
-    */
-    'categories' => [
-        'necessary' => [
-            'label' => 'Strictly necessary cookies',
-            'description' => 'Strictly necessary cookies are essential to ensure the proper functioning and security of the website.',
-            'required' => true,
-        ],
-
-        'analytics' => [
-            'label' => 'Analytics and performance cookies',
-            'description' => 'These cookies allow the collection of information, including aggregated data, about user behavior during browsing.',
-            'required' => false,
-
-            // 'vendors' => [
-            //     'google_analytics' => [
-            //         'label' => 'Google Analytics',
-            //         'description' => 'Traffic measurement and usage statistics.',
-            //     ],
-            //     'hotjar' => [
-            //         'label' => 'Hotjar',
-            //         'description' => 'User behavior analysis.',
-            //     ],
-            // ],
-        ],
-
-        'marketing' => [
-            'label' => 'Marketing cookies',
-            'description' => 'These cookies allow the display of personalized content and advertisements based on user interests and enable measurement of marketing campaign effectiveness.',
-            'required' => false,
-        ],
-
-        'functional' => [
-            'label' => 'Functional cookies',
-            'description' => 'These cookies enable enhanced functionality and personalization, such as remembering user preferences and improving the browsing experience.',
-            'required' => false,
-        ],
+        'fallback_locale' => env('COMPLIHANCE_FALLBACK_LOCALE', 'en'),
     ],
 
     /*
@@ -295,16 +250,4 @@ return [
     |
     */
     'after_revoke_redirect_url' => '/',
-
-    /*
-    |--------------------------------------------------------------------------
-    | Vite Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configure the Vite development server used during package development.
-    |
-    */
-    'vite' => [
-        'dev_server' => env('COMPLIHANCE_VITE_DEV_SERVER'),
-    ],
 ];

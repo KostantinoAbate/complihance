@@ -4,6 +4,10 @@ namespace KostantinoAbate\Complihance\Services;
 
 class ConsentModeService
 {
+    public function __construct(
+        protected ComplihanceDataRepository $data,
+    ) {}
+
     public function defaultPayload(): array
     {
         return config('complihance.consent_mode.default', []);
@@ -13,19 +17,22 @@ class ConsentModeService
     {
         $payload = $this->defaultPayload();
 
-        $mapping = config('complihance.consent_mode.mapping', []);
-
-        foreach ($mapping as $categoryKey => $consentModeKeys) {
+        foreach (
+            $this->data->consentModeMapping()
+            as $categoryKey => $consentModeKeys
+        ) {
             $granted = array_is_list($categories)
                 ? in_array($categoryKey, $categories, true)
                 : (bool) ($categories[$categoryKey] ?? false);
 
             foreach ($consentModeKeys as $consentModeKey) {
-                $payload[$consentModeKey] = $granted ? 'granted' : 'denied';
+                $payload[$consentModeKey] =
+                    $granted
+                        ? 'granted'
+                        : 'denied';
             }
         }
 
-        // Always granted: technical/security consent.
         $payload['security_storage'] = 'granted';
 
         return $payload;

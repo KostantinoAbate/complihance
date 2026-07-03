@@ -8,14 +8,24 @@ use Illuminate\Support\Str;
 use KostantinoAbate\Complihance\DTO\StoredConsentResult;
 use KostantinoAbate\Complihance\Facades\ComplihancePolicy;
 use KostantinoAbate\Complihance\Models\Consent;
+use KostantinoAbate\Complihance\Services\ComplihanceDataRepository;
+use KostantinoAbate\Complihance\Services\CurrentConsentResolver;
 use KostantinoAbate\Complihance\Services\VendorConsentResolver;
 use KostantinoAbate\Complihance\Support\GranularConsent;
 
 class StoreConsentAction
 {
+    public function __construct(
+        protected ComplihanceDataRepository $data,
+        protected CurrentConsentResolver $currentConsentResolver,
+    ) {}
+
     public function execute(Request $request): StoredConsentResult
     {
-        $configuredCategories = config('complihance.categories', []);
+        $configuredCategories = collect($this->data->rawCategories())
+            ->filter(fn ($category) => ($category['enabled'] ?? true))
+            ->all();
+
         $categoryKeys = array_keys($configuredCategories);
 
         $data = $request->validate([
@@ -43,9 +53,14 @@ class StoreConsentAction
         $acceptedVendors = [];
 
         if (GranularConsent::enabled()) {
+            $currentConsent = $this->currentConsentResolver->resolve($request);
+            $currentVendors = $currentConsent?->vendors ?? [];
+
             $acceptedVendors = app(VendorConsentResolver::class)->resolve(
                 categories: $acceptedCategories,
-                vendors: $data['vendors'] ?? []
+                vendors: array_key_exists('vendors', $data)
+                    ? $data['vendors']
+                    : $currentVendors
             );
         }
 

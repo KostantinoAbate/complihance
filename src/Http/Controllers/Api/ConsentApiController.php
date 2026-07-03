@@ -56,13 +56,13 @@ class ConsentApiController extends Controller
     ): JsonResponse {
         $currentConsent = $resolver->resolve($request);
 
+        $result = $action->execute($request);
+
         if ($currentConsent) {
             $currentConsent->update([
                 'revoked_at' => now(),
             ]);
         }
-
-        $result = $action->execute($request);
 
         return response()
             ->json([

@@ -142,7 +142,7 @@
     }
 
     function acceptedVendors() {
-        return state.consent?.consent?.vendors || {};
+        return state.consent?.consent?.vendors || [];
     }
 
     function hasCategory(category) {

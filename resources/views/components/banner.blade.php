@@ -1,9 +1,3 @@
-@php
-    $texts = config('complihance.texts', []);
-    $categories = config('complihance.categories', []);
-    $granularConsentEnabled = (bool) config('complihance.granular_consent.enabled', false);
-@endphp
-
 <div
     data-complihance-backdrop
     class="fixed inset-0 z-[9998] bg-black/40"
@@ -63,7 +57,7 @@
             @foreach ($categories as $key => $category)
                 @php
                     $required = (bool) ($category['required'] ?? false);
-                    $vendors = $category['vendors'] ?? [];
+                    $vendors = $vendorsByCategory[$key] ?? [];
                     $categoryInputId = 'cookie-category-' . $loop->iteration;
                 @endphp
 

@@ -1,0 +1,32 @@
+{
+    "translations": {
+        "en": {
+            "eyebrow": "Your cookie preferences.",
+            "title": "Personalized experiences with full control",
+            "description": [
+                "This website uses analytics and tracking cookies, as well as similar technologies. By consenting to the use of cookies and the related processing of personal data, you allow us to analyze the content you view and enable us to display advertisements tailored to your interests.",
+                "You can provide consent by clicking \"Accept all\", selecting your individual preferences, or rejecting cookies by using the dedicated button and closing the banner. You have the right to withdraw your consent at any time."
+            ],
+            "cookie_policy_label": "Cookie Policy",
+            "actions": {
+                "save": "Save preferences",
+                "reject": "Reject all",
+                "accept_all": "Accept all"
+            }
+        },
+        "it": {
+            "eyebrow": "Le tue preferenze cookie.",
+            "title": "Esperienze personalizzate con pieno controllo",
+            "description": [
+                "Questo sito utilizza cookie analytics e di tracciamento, oltre a tecnologie simili. Acconsentendo all’uso dei cookie e al relativo trattamento dei dati personali, ci consenti di analizzare i contenuti visualizzati e di mostrarti annunci personalizzati in base ai tuoi interessi.",
+                "Puoi fornire il consenso cliccando su \"Accetta tutto\", selezionando le preferenze individuali oppure rifiutando i cookie tramite il pulsante dedicato e chiudendo il banner. Puoi revocare il consenso in qualsiasi momento."
+            ],
+            "cookie_policy_label": "Cookie Policy",
+            "actions": {
+                "save": "Salva preferenze",
+                "reject": "Rifiuta tutto",
+                "accept_all": "Accetta tutto"
+            }
+        }
+    }
+}

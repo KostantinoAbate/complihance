@@ -12,7 +12,7 @@ class ScanCookiesCommand extends Command
         {--no-consent : Do not automatically accept the Complihance banner before scanning}
         {--http-header-only : Scan only Set-Cookie headers without executing JavaScript}';
 
-    protected $description = 'Scan URLs, store detected cookies and add missing cookies to the cookie config file.';
+    protected $description = 'Scan URLs, store detected cookies and add missing cookies to the published cookies JSON file.';
 
     public function handle(CookieScanner $scanner): int
     {
@@ -24,7 +24,7 @@ class ScanCookiesCommand extends Command
 
         $this->components->info("Detected {$result['detected']} unique cookie(s).");
         $this->components->info("Stored {$result['stored']} scan result(s).");
-        $this->components->info("Added {$result['added_to_config']} cookie(s) to config/complihance-cookies.php.");
+        $this->components->info("Added {$result['added_to_json']} cookie(s) to resources/vendor/complihance/cookies.json.");
 
         return self::SUCCESS;
     }

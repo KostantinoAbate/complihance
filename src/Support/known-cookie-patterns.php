@@ -6,7 +6,16 @@ return [
         'category' => 'necessary',
         'vendor' => 'Complihance',
         'duration' => '12 months',
-        'description' => 'Stores an anonymous visitor identifier used to associate consent records across sessions.',
+        'translations' => [
+            'en' => [
+                'name' => 'Complihance Anonymous ID',
+                'description' => 'Used to distinguish users.',
+            ],
+            'it' => [
+                'name' => 'Complihance Anonymous ID',
+                'description' => 'Usato per distinguere gli utenti.',
+            ],
+        ],
     ],
 
     [

@@ -1,9 +1,36 @@
+function getConfiguredVendors() {
+    return window.Complihance.getConfigurationSync()?.vendors || [];
+}
+
+function normalizeVendorKey(vendor) {
+    if (!vendor) return null;
+
+    const configuredVendor = getConfiguredVendors().find((item) => {
+        return item.key === vendor
+            || item.name === vendor
+            || item.label === vendor
+            || item.vendor === vendor;
+    });
+
+    return configuredVendor?.key || vendor;
+}
+
+function inferCategoryFromVendor(vendor) {
+    if (!vendor) return null;
+
+    const vendorKey = normalizeVendorKey(vendor);
+
+    const configuredVendor = getConfiguredVendors().find((item) => item.key === vendorKey);
+
+    return configuredVendor?.category || null;
+}
+
 function getBlockedContentCategory(element) {
     return element.dataset.complihanceCategory || null;
 }
 
 function getBlockedContentVendor(element) {
-    return element.dataset.complihanceVendor || null;
+    return normalizeVendorKey(element.dataset.complihanceVendor || null);
 }
 
 function getBlockedContentRequirement(element) {
@@ -38,9 +65,14 @@ function captureExistingSource(element) {
 }
 
 function canLoadBlockedContent(element) {
-    const category = getBlockedContentCategory(element);
     const vendor = getBlockedContentVendor(element);
     const requirement = getBlockedContentRequirement(element);
+
+    let category = getBlockedContentCategory(element);
+
+    if (!category && vendor) {
+        category = inferCategoryFromVendor(vendor);
+    }
 
     if (requirement === 'all-optional') {
         return window.Complihance.canUseAllOptionalCategories();
@@ -56,10 +88,15 @@ function canLoadBlockedContent(element) {
 }
 
 function getBlockedContentText(element) {
-    const category = getBlockedContentCategory(element);
     const vendor = getBlockedContentVendor(element);
     const placeholder = getBlockedContentPlaceholder(element);
     const requirement = getBlockedContentRequirement(element);
+
+    let category = getBlockedContentCategory(element);
+
+    if (!category && vendor) {
+        category = inferCategoryFromVendor(vendor);
+    }
 
     const placeholders = window.ComplihanceConfig?.blockedContent?.placeholders || {};
     const text = placeholders[placeholder] || placeholders.default || {};
@@ -99,18 +136,23 @@ function loadNestedSources(element) {
 }
 
 async function acceptInlineConsent(element) {
-    const category = getBlockedContentCategory(element);
     const vendor = getBlockedContentVendor(element);
     const requirement = getBlockedContentRequirement(element);
 
+    let category = getBlockedContentCategory(element);
+
+    if (!category && vendor) {
+        category = inferCategoryFromVendor(vendor);
+    }
+
     const currentConsent = await window.Complihance.refreshConsent();
+    const configuration = await window.Complihance.getConfiguration();
+
     const currentCategories = currentConsent?.consent?.accepted_categories || [];
     const categories = new Set(currentCategories);
 
     if (requirement === 'all-optional') {
-        const packageConfiguration = await window.Complihance.getPackageConfiguration();
-
-        packageConfiguration.categories
+        configuration.categories
             .filter((configuredCategory) => configuredCategory.required !== true)
             .map((configuredCategory) => configuredCategory.key)
             .filter(Boolean)
@@ -131,16 +173,32 @@ async function acceptInlineConsent(element) {
             .map(([vendorKey]) => vendorKey);
     }
 
-    const selectedVendors = new Set(vendors);
+    const selectedVendors = new Set(
+        vendors.map(normalizeVendorKey).filter(Boolean)
+    );
 
     if (vendor) {
         selectedVendors.add(vendor);
+    } else if (category) {
+        configuration.vendors
+            .filter((configuredVendor) => configuredVendor.category === category)
+            .map((configuredVendor) => configuredVendor.key)
+            .filter(Boolean)
+            .forEach((vendorKey) => {
+                selectedVendors.add(vendorKey);
+            });
     }
 
-    await window.Complihance.updatePreferences({
+    const payload = {
         categories: Array.from(categories),
         vendors: Array.from(selectedVendors),
-    });
+    };
+
+    console.log('[Complihance inline consent payload]', payload);
+
+    const response = await window.Complihance.updatePreferences(payload);
+
+    console.log('[Complihance inline consent response]', response);
 
     refreshBlockedContent();
 }

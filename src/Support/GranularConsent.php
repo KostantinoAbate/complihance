@@ -2,6 +2,8 @@
 
 namespace KostantinoAbate\Complihance\Support;
 
+use KostantinoAbate\Complihance\Services\ComplihanceDataRepository;
+
 class GranularConsent
 {
     public static function enabled(): bool
@@ -15,18 +17,11 @@ class GranularConsent
             return [];
         }
 
-        $vendors = [];
-
-        foreach (config('complihance.categories', []) as $categoryKey => $category) {
-            foreach (($category['vendors'] ?? []) as $vendorKey => $vendor) {
-                $vendors[$vendorKey] = [
-                    ...$vendor,
-                    'category' => $categoryKey,
-                    'category_required' => (bool) ($category['required'] ?? false),
-                ];
-            }
-        }
-
-        return $vendors;
+        return collect(
+            app(ComplihanceDataRepository::class)
+                ->vendors()
+        )
+            ->keyBy('key')
+            ->all();
     }
 }

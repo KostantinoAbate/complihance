@@ -35,7 +35,7 @@ import { updateConsentMode } from './modules/consent-mode';
 
     Promise.all([
         window.Complihance.getConsent(),
-        window.Complihance.getPackageConfiguration(),
+        window.Complihance.getConfiguration(),
     ])
         .catch(() => {
             // ignore bootstrap errors

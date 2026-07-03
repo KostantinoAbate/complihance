@@ -1,8 +1,3 @@
-@php
-    $cookiesByCategory = $cookies();
-    $categories = config('complihance.categories', []);
-@endphp
-
 @if($cookiesByCategory->isNotEmpty())
     <div class="space-y-8">
         @foreach($cookiesByCategory as $categoryKey => $cookies)

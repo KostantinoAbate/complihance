@@ -1,20 +1,3 @@
-@php
-    $texts = config('complihance.texts', []);
-    $categories = config('complihance.categories', []);
-    $granularConsentEnabled = (bool) config('complihance.granular_consent.enabled', false);
-
-    $consentCookie = request()->cookie(config('complihance.cookie_name', 'complihance_consent'));
-    $currentConsent = $consentCookie ? json_decode($consentCookie, true) : [];
-
-    $acceptedCategories = collect($currentConsent['accepted_categories'] ?? [])
-        ->values()
-        ->all();
-
-    $acceptedVendors = collect($currentConsent['vendors'] ?? [])
-        ->values()
-        ->all();
-@endphp
-
 <div
     data-complihance-preferences
     data-complihance-endpoint="{{ route('complihance.consent.store') }}"
@@ -31,7 +14,7 @@
             @foreach ($categories as $key => $category)
                 @php
                     $required = (bool) ($category['required'] ?? false);
-                    $vendors = $category['vendors'] ?? [];
+                    $vendors = $vendorsByCategory[$key] ?? [];
                     $categoryInputId = 'preferences-cookie-category-' . $loop->iteration;
                     $categoryChecked = $required || in_array($key, $acceptedCategories, true);
                 @endphp
@@ -116,13 +99,6 @@
             {{ $texts['preferences']['saved'] ?? 'Preferenze aggiornate correttamente.' }}
         </p>
     </form>
-
-    <p
-        data-complihance-preferences-feedback
-        class="mt-3 hidden text-sm text-green-700"
-    >
-        {{ $texts['preferences']['saved'] ?? 'Preferenze aggiornate correttamente.' }}
-    </p>
 
     <button
         type="button"

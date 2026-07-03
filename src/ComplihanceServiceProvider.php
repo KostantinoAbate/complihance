@@ -23,12 +23,18 @@ class ComplihanceServiceProvider extends PackageServiceProvider
 {
     public function packageBooted(): void
     {
+        $this->publishes([
+            __DIR__.'/../resources/data/categories.json' => resource_path('vendor/complihance/categories.json'),
+            __DIR__.'/../resources/data/cookies.json' => resource_path('vendor/complihance/cookies.json'),
+            __DIR__.'/../resources/data/texts.json' => resource_path('vendor/complihance/texts.json'),
+        ], 'complihance-data');
+
         Blade::directive('complihanceBanner', function () {
-            return '<?php if (app(\\'.BannerVisibilityResolver::class."::class)->shouldShow()) { echo view('complihance::components.banner')->render(); } ?>";
+            return "<?php echo Blade::render('<x-complihance-banner />'); ?>";
         });
 
         Blade::directive('complihancePreferences', function () {
-            return '<?php if (app(\\'.PreferencesVisibilityResolver::class."::class)->shouldShow()) { echo view('complihance::components.preferences')->render(); } ?>";
+            return "<?php echo Blade::render('<x-complihance-preferences />'); ?>";
         });
 
         Blade::directive('complihanceScript', function () {
@@ -75,7 +81,7 @@ class ComplihanceServiceProvider extends PackageServiceProvider
          */
         $package
             ->name('complihance')
-            ->hasConfigFile(['complihance', 'complihance-cookies'])
+            ->hasConfigFile('complihance')
             ->hasViews()
             ->hasRoute('web')
             ->hasAssets()
@@ -94,12 +100,21 @@ class ComplihanceServiceProvider extends PackageServiceProvider
 
                         $command->newLine();
 
+                        $command->line('Publish editable Complihance data files:');
+                        $command->line('php artisan vendor:publish --tag=complihance-data');
+
+                        $command->newLine();
+
                         $command->warn('Cookie scanner browser mode requires Playwright and Chromium.');
                         $command->line('Install them in your Laravel application if you want to detect JavaScript-generated cookies:');
+
                         $command->newLine();
+
                         $command->line('npm install -D playwright');
                         $command->line('npx playwright install chromium');
+
                         $command->newLine();
+
                         $command->line('Alternatively, use the HTTP-only scanner mode:');
                         $command->line('php artisan complihance:scan-cookies https://example.com --http-header-only');
                     });
