@@ -229,6 +229,7 @@
         const configuration = await getConfiguration();
 
         return savePreferences({
+            source: 'banner',
             categories: configuration.categories
                 .map((category) => category.key)
                 .filter(Boolean),
@@ -243,6 +244,7 @@
         const configuration = await getConfiguration();
 
         return savePreferences({
+            source: 'banner',
             categories: configuration.categories
                 .filter((category) => category.required === true)
                 .map((category) => category.key)

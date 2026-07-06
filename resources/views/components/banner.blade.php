@@ -5,7 +5,6 @@
 
 <div
     data-complihance-banner
-    data-complihance-endpoint="{{ route('complihance.consent.store') }}"
     class="fixed inset-x-0 bottom-0 z-[9999] max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white p-6 text-slate-900 shadow-2xl ring-1 ring-black/10 md:p-8"
 >
     <button
@@ -36,10 +35,10 @@
             </p>
         @endforeach
 
-        @if (! empty($texts['cookie_policy_url']) && ! empty($texts['cookie_policy_label']))
+        @if (! empty(config('complihance.cookie_policy_url')) && ! empty($texts['cookie_policy_label']))
             <p class="mb-5 text-xs">
                 <a
-                    href="{{ $texts['cookie_policy_url'] }}"
+                    href="{{ config('complihance.cookie_policy_url') }}"
                     class="font-medium underline underline-offset-2"
                     target="_blank"
                     rel="noopener"

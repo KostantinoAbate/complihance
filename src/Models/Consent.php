@@ -5,6 +5,7 @@ namespace KostantinoAbate\Complihance\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Consent extends Model
 {
@@ -18,6 +19,7 @@ class Consent extends Model
         'subject_id',
         'session_id',
         'anonymous_id',
+        'source',
         'accepted_categories',
         'rejected_categories',
         'vendors',
@@ -42,7 +44,7 @@ class Consent extends Model
         return ['consent_uuid'];
     }
 
-    public function subject()
+    public function subject(): MorphTo
     {
         return $this->morphTo();
     }

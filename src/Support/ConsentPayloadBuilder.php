@@ -2,13 +2,12 @@
 
 namespace KostantinoAbate\Complihance\Support;
 
-use Illuminate\Http\Request;
 use KostantinoAbate\Complihance\Facades\ComplihancePolicy;
 use KostantinoAbate\Complihance\Models\Consent;
 
 class ConsentPayloadBuilder
 {
-    public function build(?Consent $consent, Request $request): array
+    public function build(?Consent $consent): array
     {
         return [
             'has_consent' => $consent !== null && $consent->revoked_at === null,

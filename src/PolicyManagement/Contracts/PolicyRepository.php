@@ -1,6 +1,6 @@
 <?php
 
-namespace KostantinoAbate\Complihance\Policies\Contracts;
+namespace KostantinoAbate\Complihance\PolicyManagement\Contracts;
 
 use KostantinoAbate\Complihance\DTO\Policy;
 

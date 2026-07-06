@@ -11,6 +11,7 @@ use KostantinoAbate\Complihance\Models\Consent;
 use KostantinoAbate\Complihance\Services\ComplihanceDataRepository;
 use KostantinoAbate\Complihance\Services\CurrentConsentResolver;
 use KostantinoAbate\Complihance\Services\VendorConsentResolver;
+use KostantinoAbate\Complihance\Support\ConsentSource;
 use KostantinoAbate\Complihance\Support\GranularConsent;
 
 class StoreConsentAction
@@ -33,7 +34,10 @@ class StoreConsentAction
             'categories.*' => ['string', 'in:'.implode(',', $categoryKeys)],
             'vendors' => ['sometimes', 'array'],
             'vendors.*' => ['string'],
+            'source' => ['sometimes', 'nullable', 'string'],
         ]);
+
+        $source = ConsentSource::normalize($data['source'] ?? null);
 
         $acceptedCategories = collect($data['categories'])
             ->unique()
@@ -70,8 +74,10 @@ class StoreConsentAction
             ->all();
 
         $sessionId = $request->hasSession() ? $request->session()->getId() : null;
-        $anonymousId = $request->cookie(config('complihance.anonymous_cookie_name', 'complihance_anonymous_id'))
-            ?? (string) Str::uuid();
+
+        $anonymousId = $request->cookie(
+            config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
+        ) ?? (string) Str::uuid();
 
         $ipAddress = $request->ip();
         $userAgent = $request->userAgent();
@@ -92,6 +98,7 @@ class StoreConsentAction
             'ip_address' => $ipAddress,
             'user_agent' => $userAgent,
 
+            'source' => $source,
             'accepted_at' => now(),
         ];
 
@@ -104,7 +111,7 @@ class StoreConsentAction
         ComplihancePolicy::accept(
             key: 'cookie',
             subject: auth()->check() ? auth()->user() : null,
-            source: 'cookie_banner',
+            source: $source,
             consentId: $consent->id,
             anonymousId: $anonymousId,
             sessionId: $sessionId,
@@ -124,6 +131,7 @@ class StoreConsentAction
             'rejected_categories' => $rejectedCategories,
             'policy_version' => $consent->policy_version,
             'cookie_configuration_version' => $consent->cookie_configuration_version,
+            'source' => $source,
             'accepted_at' => $consent->accepted_at?->toISOString(),
         ];
 
@@ -141,7 +149,7 @@ class StoreConsentAction
                 secure: $request->isSecure(),
                 httpOnly: false,
                 raw: false,
-                sameSite: 'Lax'
+                sameSite: 'Lax',
             ),
             anonymousCookie: Cookie::make(
                 name: config('complihance.anonymous_cookie_name', 'complihance_anonymous_id'),
@@ -151,7 +159,7 @@ class StoreConsentAction
                 secure: $request->isSecure(),
                 httpOnly: true,
                 raw: false,
-                sameSite: 'Lax'
+                sameSite: 'Lax',
             ),
         );
     }

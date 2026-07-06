@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('session_id')->nullable()->index();
             $table->string('anonymous_id')->nullable()->index();
 
+            $table->string('source')->default('api');
+
             $table->json('accepted_categories');
             $table->json('rejected_categories')->nullable();
 

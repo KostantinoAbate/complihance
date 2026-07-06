@@ -1,6 +1,5 @@
 <div
     data-complihance-preferences
-    data-complihance-endpoint="{{ route('complihance.consent.store') }}"
     class="rounded-2xl border border-slate-200 bg-white p-6 text-slate-900"
 >
     <h2 class="mb-4 text-xl font-bold">

@@ -4,7 +4,7 @@ namespace KostantinoAbate\Complihance\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ComplihancePolicy extends Model
+class PolicyVersion extends Model
 {
     protected $table = 'complihance_policies';
 

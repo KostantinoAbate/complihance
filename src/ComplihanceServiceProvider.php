@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Blade;
 use KostantinoAbate\Complihance\Commands\ResetCommand;
 use KostantinoAbate\Complihance\Commands\RetentionCommand;
 use KostantinoAbate\Complihance\Commands\ScanCookiesCommand;
-use KostantinoAbate\Complihance\Policies\PolicyManager;
+use KostantinoAbate\Complihance\PolicyManagement\PolicyManager;
 use KostantinoAbate\Complihance\Services\ComplihanceScriptRenderer;
 use KostantinoAbate\Complihance\Services\ConsentModeRenderer;
 use KostantinoAbate\Complihance\Support\BlockedContentAttributes;

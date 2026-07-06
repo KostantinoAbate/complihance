@@ -1,17 +1,17 @@
 <?php
 
-namespace KostantinoAbate\Complihance\Policies;
+namespace KostantinoAbate\Complihance\PolicyManagement;
 
 use InvalidArgumentException;
 use KostantinoAbate\Complihance\DTO\Policy;
-use KostantinoAbate\Complihance\Models\ComplihancePolicy as PolicyModel;
-use KostantinoAbate\Complihance\Policies\Contracts\PolicyRepository;
+use KostantinoAbate\Complihance\Models\PolicyVersion;
+use KostantinoAbate\Complihance\PolicyManagement\Contracts\PolicyRepository;
 
 class DatabasePolicyRepository implements PolicyRepository
 {
     public function current(string $key): Policy
     {
-        $policy = PolicyModel::query()
+        $policy = PolicyVersion::query()
             ->where('key', $key)
             ->where('is_active', true)
             ->latest('published_at')

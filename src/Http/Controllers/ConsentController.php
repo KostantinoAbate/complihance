@@ -15,9 +15,10 @@ class ConsentController extends Controller
 
         return response()
             ->json([
-                'saved' => true,
+                'has_consent' => true,
+                'requires_renewal' => false,
                 'consent' => $result->payload,
-            ])
+            ], 201)
             ->withCookie($result->consentCookie)
             ->withCookie($result->anonymousCookie);
     }

@@ -25,6 +25,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cookie Policy URL
+    |--------------------------------------------------------------------------
+    |
+    | Set cookie policy URL to link it in the consent banner.
+    |
+    */
+    'cookie_policy_url' => '/cookie-policy',
+
+    /*
+    |--------------------------------------------------------------------------
     | Package Routes
     |--------------------------------------------------------------------------
     |
@@ -195,8 +205,11 @@ return [
     |
     */
     'policy_acceptance_sources' => [
-        'cookie_banner' => 'Cookie banner',
-        'custom_form' => 'Custom form',
+        'banner',
+        'preferences',
+        'api',
+        'seeder',
+        'console',
     ],
 
     /*

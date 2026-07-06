@@ -1,10 +1,11 @@
 <?php
 
-namespace KostantinoAbate\Complihance\Policies;
+namespace KostantinoAbate\Complihance\PolicyManagement;
 
 use InvalidArgumentException;
 use KostantinoAbate\Complihance\DTO\Policy;
 use KostantinoAbate\Complihance\Models\ComplihancePolicyAcceptance;
+use KostantinoAbate\Complihance\Support\PolicyAcceptanceSource;
 
 class PolicyManager
 {
@@ -50,6 +51,7 @@ class PolicyManager
         array $metadata = [],
     ): ComplihancePolicyAcceptance {
         $policy = $this->get($key);
+        $source = PolicyAcceptanceSource::normalize($source);
 
         return ComplihancePolicyAcceptance::query()->create([
             'consent_id' => $consentId,
@@ -68,7 +70,7 @@ class PolicyManager
             'policy_key' => $policy->key,
             'policy_version' => $policy->version,
 
-            'source' => $source ?? 'custom_form',
+            'source' => $source,
             'metadata' => $metadata,
 
             'ip_address' => $ipAddress ?? request()->ip(),

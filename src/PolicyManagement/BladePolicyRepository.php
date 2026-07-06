@@ -1,10 +1,10 @@
 <?php
 
-namespace KostantinoAbate\Complihance\Policies;
+namespace KostantinoAbate\Complihance\PolicyManagement;
 
 use InvalidArgumentException;
 use KostantinoAbate\Complihance\DTO\Policy;
-use KostantinoAbate\Complihance\Policies\Contracts\PolicyRepository;
+use KostantinoAbate\Complihance\PolicyManagement\Contracts\PolicyRepository;
 
 class BladePolicyRepository implements PolicyRepository
 {

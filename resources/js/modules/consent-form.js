@@ -61,6 +61,9 @@ export function initConsentForm(container) {
 
     const getConsentPayload = () => {
         const payload = {
+            source: container.matches('[data-complihance-preferences]')
+                ? 'preferences'
+                : 'banner',
             categories: getSelectedCategories(),
         };
 
