@@ -3,8 +3,8 @@
 namespace KostantinoAbate\Complihance\Services;
 
 use KostantinoAbate\Complihance\DTO\ConsentRequestContext;
-use KostantinoAbate\Complihance\Models\Consent;
 use KostantinoAbate\Complihance\Models\ComplihancePolicyAcceptance;
+use KostantinoAbate\Complihance\Models\Consent;
 use KostantinoAbate\Complihance\PolicyManagement\PolicyManager;
 use KostantinoAbate\Complihance\Support\PolicyAcceptanceSource;
 

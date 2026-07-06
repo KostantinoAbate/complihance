@@ -19,6 +19,6 @@ class CspNonce
     {
         $nonce = static::value();
 
-        return $nonce ? ' nonce="' . e($nonce) . '"' : '';
+        return $nonce ? ' nonce="'.e($nonce).'"' : '';
     }
 }
