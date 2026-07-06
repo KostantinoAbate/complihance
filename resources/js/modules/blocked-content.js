@@ -207,23 +207,36 @@ function createBlockedContentPlaceholder(element) {
         placeholder.style.setProperty('--complihance-blocked-content-height', `${rect.height}px`);
     }
 
-    placeholder.innerHTML = `
-        <div class="complihance-blocked-content__inner">
-            <p class="complihance-blocked-content__title">${text.title}</p>
-            <p class="complihance-blocked-content__description">${text.description}</p>
-            ${
-        hasInlineConsent(element)
-            ? `<button type="button" class="complihance-blocked-content__button" data-complihance-inline-consent-button>${text.button}</button>`
-            : ''
-    }
-        </div>
-    `;
+    const inner = document.createElement('div');
+    inner.className = 'complihance-blocked-content__inner';
 
-    placeholder
-        .querySelector('[data-complihance-inline-consent-button]')
-        ?.addEventListener('click', () => {
+    const title = document.createElement('p');
+    title.className = 'complihance-blocked-content__title';
+    title.textContent = text.title || '';
+
+    const description = document.createElement('p');
+    description.className = 'complihance-blocked-content__description';
+    description.textContent = text.description || '';
+
+    inner.appendChild(title);
+    inner.appendChild(description);
+
+    if (hasInlineConsent(element)) {
+        const button = document.createElement('button');
+
+        button.type = 'button';
+        button.className = 'complihance-blocked-content__button';
+        button.dataset.complihanceInlineConsentButton = '';
+        button.textContent = text.button || '';
+
+        button.addEventListener('click', () => {
             acceptInlineConsent(element);
         });
+
+        inner.appendChild(button);
+    }
+
+    placeholder.appendChild(inner);
 
     blockNestedSources(element);
 

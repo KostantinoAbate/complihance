@@ -1,0 +1,70 @@
+@use "../abstracts/mixins" as *;
+
+.complihance-actions {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    gap: space(sm);
+    justify-content: space-between;
+
+    @include mq(md) {
+        flex-direction: row;
+    }
+
+    &__group {
+        display: flex;
+        flex-direction: column;
+        gap: space(sm);
+        justify-content: center;
+
+        @include mq(md) {
+            flex-direction: row;
+        }
+    }
+}
+
+.complihance-button {
+    border: 0;
+    border-radius: r(lg);
+    padding: space(sm) space(lg);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &--ghost {
+        background: transparent;
+        color: #475569;
+
+        &:hover {
+            background: #f1f5f9;
+        }
+    }
+
+    &--secondary {
+        background: #f1f5f9;
+        color: c(text);
+
+        &:hover {
+            background: #e2e8f0;
+        }
+    }
+
+    &--primary {
+        background: c(primary);
+        color: #ffffff;
+
+        &:hover {
+            background: c(primary-hover);
+        }
+    }
+
+    &--danger {
+        margin-top: space(lg);
+        background: c(danger);
+        color: c(danger-text);
+
+        &:hover {
+            background: c(danger-hover);
+        }
+    }
+}

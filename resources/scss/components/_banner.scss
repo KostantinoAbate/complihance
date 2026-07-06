@@ -1,0 +1,78 @@
+@use "../abstracts/mixins" as *;
+
+.complihance-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: z(backdrop);
+    background: rgb(0 0 0 / 40%);
+}
+
+.complihance-banner {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: z(banner);
+    max-height: 85vh;
+    overflow-y: auto;
+    border: 1px solid rgb(0 0 0 / 10%);
+    border-radius: r(2xl) r(2xl) 0 0;
+    background: c(surface);
+    color: c(text);
+    padding: space(2xl);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 25%);
+
+    @include mq(md) {
+        padding: space(3xl);
+    }
+
+    &__close {
+        position: absolute;
+        top: 1rem;
+        right: 1.25rem;
+        border: 0;
+        background: transparent;
+        color: c(text);
+        font-size: 1.875rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    &__content {
+        padding-right: 2rem;
+    }
+}
+
+.complihance-eyebrow {
+    margin: 0 0 space(xs);
+    font-size: 0.75rem;
+    color: c(muted);
+}
+
+.complihance-title {
+    margin: 0 0 space(sm);
+    font-size: 1.25rem;
+    line-height: 1.2;
+    font-weight: 700;
+
+    @include mq(md) {
+        font-size: 1.5rem;
+    }
+}
+
+.complihance-description {
+    margin: 0 0 0.375rem;
+    font-size: 0.75rem;
+    line-height: 1.5rem;
+    color: #334155;
+}
+
+.complihance-policy-link {
+    margin: 0 0 space(xl);
+    font-size: 0.75rem;
+
+    a {
+        font-weight: 500;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+}

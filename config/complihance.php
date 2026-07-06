@@ -263,4 +263,29 @@ return [
     |
     */
     'after_revoke_redirect_url' => '/',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Content Security Policy (CSP)
+    |--------------------------------------------------------------------------
+    |
+    | Complihance supports CSP nonces for the inline scripts required to
+    | expose the frontend configuration and initialize Google Consent Mode.
+    |
+    | You may provide a static nonce value:
+    |
+    |     'csp_nonce' => 'your-generated-nonce',
+    |
+    | or a resolver callback that returns the nonce dynamically:
+    |
+    |     'csp_nonce_resolver' => fn () => csp_nonce(),
+    |
+    | If both options are null, Complihance will render the inline scripts
+    | without a nonce attribute.
+    |
+    */
+
+    'csp_nonce' => null,
+
+    'csp_nonce_resolver' => null,
 ];

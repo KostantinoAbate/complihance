@@ -36,10 +36,6 @@ function syncVendorsFromCategory(form, categoryInput) {
     categoryInput.indeterminate = false;
 }
 
-function forgetCookie(name) {
-    document.cookie = `${name}=; Max-Age=0; path=/`;
-}
-
 export function initConsentForm(container) {
     const form = container.querySelector('[data-complihance-form]');
     const backdrop = document.querySelector('[data-complihance-backdrop]');
@@ -88,18 +84,18 @@ export function initConsentForm(container) {
         if (!error) {
             error = document.createElement('p');
             error.dataset.complihanceError = 'true';
-            error.className = 'mt-3 text-sm text-red-600';
+            error.className = 'complihance-error';
             form.appendChild(error);
         }
 
         error.textContent = message;
-        error.classList.remove('hidden');
+        error.classList.remove('complihance-hidden');
     };
 
     const clearFormError = () => {
         container
             .querySelector('[data-complihance-error]')
-            ?.classList.add('hidden');
+            ?.classList.add('complihance-hidden');
     };
 
     const saveConsent = async () => {
@@ -127,7 +123,7 @@ export function initConsentForm(container) {
             const feedback = container.querySelector('[data-complihance-preferences-feedback]');
 
             if (feedback) {
-                feedback.classList.remove('hidden');
+                feedback.classList.remove('complihance-hidden');
             }
 
             window.dispatchEvent(new CustomEvent('complihance:consent-saved', {
@@ -209,9 +205,6 @@ export function initConsentForm(container) {
     document.querySelectorAll('[data-complihance-revoke]').forEach((button) => {
         button.addEventListener('click', async () => {
             await window.Complihance.revoke();
-
-            forgetCookie('complihance_consent');
-            forgetCookie('complihance_anonymous_id');
 
             window.location.href = window.ComplihanceConfig?.afterRevokeRedirectUrl || '/';
         });

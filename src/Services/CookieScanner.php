@@ -24,13 +24,20 @@ class CookieScanner
         $detectedCookieNames = [];
 
         foreach ($cookies as $cookie) {
+            $identityHash = hash('sha256', implode('|', [
+                $cookie['name'] ?? '',
+                $cookie['domain'] ?? '',
+                $cookie['path'] ?? '/',
+            ]));
+
             CookieScanResult::updateOrCreate(
                 [
-                    'name' => $cookie['name'],
-                    'domain' => $cookie['domain'],
-                    'path' => $cookie['path'],
+                    'identity_hash' => $identityHash,
                 ],
                 [
+                    'name' => $cookie['name'],
+                    'domain' => $cookie['domain'] ?? null,
+                    'path' => $cookie['path'] ?? '/',
                     'url' => $cookie['url'],
                     'secure' => $cookie['secure'],
                     'http_only' => $cookie['http_only'],

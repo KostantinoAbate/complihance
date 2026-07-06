@@ -30,8 +30,8 @@ return new class extends Migration
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
 
-            $table->timestamp('accepted_at')->nullable();
-            $table->timestamp('revoked_at')->nullable();
+            $table->timestamp('accepted_at')->nullable()->index();
+            $table->timestamp('revoked_at')->nullable()->index();
 
             $table->timestamps();
         });
@@ -52,6 +52,7 @@ return new class extends Migration
 
         Schema::create('complihance_policy_acceptances', function (Blueprint $table) {
             $table->id();
+            $table->string('identity_hash', 64)->unique();
 
             $table->foreignId('consent_id')
                 ->nullable()
@@ -78,18 +79,11 @@ return new class extends Migration
             $table->timestamp('accepted_at')->index();
 
             $table->timestamps();
-
-            $table->unique([
-                'subject_type',
-                'subject_id',
-                'policy_key',
-                'policy_version',
-                'source',
-            ], 'complihance_policy_acceptances_lookup');
         });
 
         Schema::create('complihance_cookie_scan_results', function (Blueprint $table) {
             $table->id();
+            $table->string('identity_hash', 64)->unique();
 
             $table->string('name')->index();
             $table->string('domain')->nullable();
@@ -102,8 +96,6 @@ return new class extends Migration
             $table->timestamp('expires_at')->nullable();
 
             $table->timestamps();
-
-            $table->unique(['name', 'domain', 'path'], 'complihance_cookie_scan_unique');
         });
     }
 

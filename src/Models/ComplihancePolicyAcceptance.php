@@ -45,6 +45,7 @@ class ComplihancePolicyAcceptance extends Model
     public function anonymizeForRetention(): bool
     {
         return $this->forceFill([
+            'identity_hash' => hash('sha256', 'anonymized|' . $this->getKey() . '|' . now()->timestamp),
             'subject_type' => null,
             'subject_id' => null,
             'session_id' => null,

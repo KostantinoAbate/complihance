@@ -6,9 +6,8 @@
         "build": "vite build"
     },
     "devDependencies": {
-        "@tailwindcss/vite": "^4.3.1",
         "@vitejs/plugin-legacy": "^7.0.0",
-        "tailwindcss": "^4.3.1",
+        "sass": "^1.101.0",
         "vite": "^7.3.6"
     }
 }

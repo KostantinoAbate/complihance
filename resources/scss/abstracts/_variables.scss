@@ -1,0 +1,41 @@
+$prefix: "complihance" !default;
+
+$z-indexes: (
+    backdrop: 9998,
+    banner: 9999,
+) !default;
+
+$colors: (
+    text: #0f172a,
+    muted: #64748b,
+    border: #e2e8f0,
+    surface: #ffffff,
+    soft: #f8fafc,
+    primary: #0f172a,
+    primary-hover: #1e293b,
+    danger: #991b1b,
+    danger-hover: #b91c1c,
+    danger-text: #fef2f2,
+    success: #15803d,
+    error: #dc2626,
+) !default;
+
+$radii: (
+    lg: 0.75rem,
+    xl: 1rem,
+    2xl: 1.25rem,
+) !default;
+
+$breakpoints: (
+    md: 768px,
+) !default;
+
+$spacing: (
+    xs: 0.25rem,
+    sm: 0.5rem,
+    md: 0.75rem,
+    lg: 1rem,
+    xl: 1.25rem,
+    2xl: 1.5rem,
+    3xl: 2rem,
+) !default;

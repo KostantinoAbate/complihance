@@ -1,0 +1,78 @@
+@use "../abstracts/mixins" as *;
+
+.complihance-categories {
+    display: grid;
+    gap: space(md);
+    margin-bottom: space(xl);
+}
+
+.complihance-row {
+    display: flex;
+    align-items: flex-start;
+    gap: space(md);
+
+    &--center {
+        align-items: center;
+    }
+}
+
+.complihance-checkbox {
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+    accent-color: c(primary);
+
+    &:disabled {
+        accent-color: #cbd5e1;
+    }
+}
+
+.complihance-label {
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: c(text);
+
+    &--disabled {
+        color: c(muted);
+    }
+}
+
+.complihance-help {
+    margin: space(md) 0 0;
+    padding-left: 1.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+    color: c(muted);
+}
+
+.complihance-vendors {
+    display: grid;
+    gap: space(sm);
+    margin-top: space(lg);
+    margin-left: 1.75rem;
+}
+
+.complihance-vendor {
+    display: flex;
+    align-items: flex-start;
+    gap: space(md);
+    border-radius: r(lg);
+    background: c(soft);
+    padding: space(md);
+
+    &__title {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    &__description {
+        display: block;
+        margin-top: space(xs);
+        font-size: 0.75rem;
+        line-height: 1.25rem;
+        color: c(muted);
+    }
+}

@@ -1,0 +1,24 @@
+@use "sass:map";
+@use "variables" as *;
+
+@mixin mq($breakpoint) {
+    @media (min-width: map.get($breakpoints, $breakpoint)) {
+        @content;
+    }
+}
+
+@function c($key) {
+    @return var(--#{$prefix}-color-#{$key});
+}
+
+@function r($key) {
+    @return var(--#{$prefix}-radius-#{$key});
+}
+
+@function z($key) {
+    @return var(--#{$prefix}-z-#{$key});
+}
+
+@function space($key) {
+    @return map.get($spacing, $key);
+}

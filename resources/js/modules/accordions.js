@@ -13,8 +13,7 @@ export function initAccordions(root = document) {
             const isOpen = trigger.getAttribute('aria-expanded') === 'true';
 
             trigger.setAttribute('aria-expanded', String(!isOpen));
-            panel.classList.toggle('grid-rows-[1fr]', !isOpen);
-            panel.classList.toggle('grid-rows-[0fr]', isOpen);
+            panel.classList.toggle('complihance-accordion__panel--open', !isOpen);
             icon.textContent = isOpen ? '+' : '−';
         });
     });

@@ -5,9 +5,11 @@ namespace KostantinoAbate\Complihance\Http\Controllers\Api;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Cookie;
+use KostantinoAbate\Complihance\Actions\ResolveCurrentConsentAction;
+use KostantinoAbate\Complihance\Actions\RevokeConsentAction;
 use KostantinoAbate\Complihance\Actions\StoreConsentAction;
-use KostantinoAbate\Complihance\Services\CurrentConsentResolver;
+use KostantinoAbate\Complihance\Actions\UpdateConsentAction;
+use KostantinoAbate\Complihance\Services\ConsentResponseFactory;
 use KostantinoAbate\Complihance\Support\ConsentPayloadBuilder;
 
 class ConsentApiController extends Controller
@@ -15,11 +17,12 @@ class ConsentApiController extends Controller
     public function show(
         Request $request,
         ConsentPayloadBuilder $builder,
-        CurrentConsentResolver $resolver,
+        ResolveCurrentConsentAction $resolveCurrentConsent,
+        ConsentResponseFactory $responseFactory,
     ): JsonResponse {
-        return response()->json(
+        return $responseFactory->current(
             $builder->build(
-                $resolver->resolve($request),
+                $resolveCurrentConsent->execute($request),
                 $request,
             )
         );
@@ -28,76 +31,59 @@ class ConsentApiController extends Controller
     public function status(
         Request $request,
         ConsentPayloadBuilder $builder,
-        CurrentConsentResolver $resolver,
+        ResolveCurrentConsentAction $resolveCurrentConsent,
+        ConsentResponseFactory $responseFactory,
     ): JsonResponse {
-        return $this->show($request, $builder, $resolver);
+        return $this->currentConsentResponse(
+            $request,
+            $builder,
+            $resolveCurrentConsent,
+            $responseFactory,
+        );
     }
 
     public function store(
         Request $request,
-        StoreConsentAction $action,
+        StoreConsentAction $storeConsent,
+        ConsentResponseFactory $responseFactory,
     ): JsonResponse {
-        $result = $action->execute($request);
-
-        return response()
-            ->json([
-                'has_consent' => true,
-                'requires_renewal' => false,
-                'consent' => $result->payload,
-            ], 201)
-            ->withCookie($result->consentCookie)
-            ->withCookie($result->anonymousCookie);
+        return $responseFactory->stored(
+            result: $storeConsent->execute($request),
+            status: 201,
+        );
     }
 
     public function update(
         Request $request,
-        StoreConsentAction $action,
-        CurrentConsentResolver $resolver,
+        UpdateConsentAction $updateConsent,
+        ConsentResponseFactory $responseFactory,
     ): JsonResponse {
-        $currentConsent = $resolver->resolve($request);
-
-        $result = $action->execute($request);
-
-        if ($currentConsent) {
-            $currentConsent->update([
-                'revoked_at' => now(),
-            ]);
-        }
-
-        return response()
-            ->json([
-                'has_consent' => true,
-                'requires_renewal' => false,
-                'consent' => $result->payload,
-            ])
-            ->withCookie($result->consentCookie)
-            ->withCookie($result->anonymousCookie);
+        return $responseFactory->stored(
+            result: $updateConsent->execute($request),
+        );
     }
 
     public function revoke(
         Request $request,
-        CurrentConsentResolver $resolver,
+        RevokeConsentAction $revokeConsent,
+        ConsentResponseFactory $responseFactory,
     ): JsonResponse {
-        $consent = $resolver->resolve($request);
+        $revokeConsent->execute($request);
 
-        if ($consent) {
-            $consent->update([
-                'revoked_at' => now(),
-            ]);
-        }
+        return $responseFactory->revoked();
+    }
 
-        return response()
-            ->json([
-                'revoked' => true,
-                'has_consent' => false,
-                'requires_renewal' => true,
-                'consent' => null,
-            ])
-            ->withCookie(Cookie::forget(
-                config('complihance.cookie_name', 'complihance_consent')
-            ))
-            ->withCookie(Cookie::forget(
-                config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
-            ));
+    private function currentConsentResponse(
+        Request $request,
+        ConsentPayloadBuilder $builder,
+        ResolveCurrentConsentAction $resolveCurrentConsent,
+        ConsentResponseFactory $responseFactory,
+    ): JsonResponse {
+        return $responseFactory->current(
+            $builder->build(
+                $resolveCurrentConsent->execute($request),
+                $request,
+            )
+        );
     }
 }

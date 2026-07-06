@@ -2,12 +2,15 @@
 
 namespace KostantinoAbate\Complihance\Services;
 
+use Illuminate\Http\Request;
 use KostantinoAbate\Complihance\Facades\ComplihancePolicy;
 
 class BannerVisibilityResolver
 {
     public function __construct(
         protected CurrentConsentResolver $currentConsentResolver,
+        protected ConsentRequestContextResolver $contextResolver,
+        protected Request $request,
     ) {}
 
     public function shouldShow(): bool
@@ -32,7 +35,7 @@ class BannerVisibilityResolver
 
     protected function decodedConsentCookie(): ?array
     {
-        $cookie = request()->cookies->get(
+        $cookie = $this->request->cookies->get(
             config('complihance.cookie_name', 'complihance_consent')
         );
 
@@ -47,7 +50,14 @@ class BannerVisibilityResolver
 
     protected function cookiePolicyRequiresAcceptance(): bool
     {
-        return ComplihancePolicy::requiresAcceptance('cookie');
+        $context = $this->contextResolver->resolve($this->request);
+
+        return ComplihancePolicy::requiresAcceptance(
+            key: 'cookie',
+            subject: $context->subject,
+            anonymousId: $context->anonymousId,
+            sessionId: $context->sessionId,
+        );
     }
 
     protected function cookieConfigurationChanged(array $decodedConsent): bool

@@ -10,6 +10,7 @@ use KostantinoAbate\Complihance\PolicyManagement\PolicyManager;
 use KostantinoAbate\Complihance\Services\ComplihanceScriptRenderer;
 use KostantinoAbate\Complihance\Services\ConsentModeRenderer;
 use KostantinoAbate\Complihance\Support\BlockedContentAttributes;
+use KostantinoAbate\Complihance\Support\ComplihanceHtmlSanitizer;
 use KostantinoAbate\Complihance\View\Components\Banner;
 use KostantinoAbate\Complihance\View\Components\CookieTable;
 use KostantinoAbate\Complihance\View\Components\Preferences;
@@ -59,6 +60,10 @@ class ComplihanceServiceProvider extends PackageServiceProvider
             }
 
             return '<?php echo app(\\'.BlockedContentAttributes::class."::class)->render({$expression}); ?>";
+        });
+
+        Blade::directive('complihanceHtml', function ($expression) {
+            return "<?php echo app(".ComplihanceHtmlSanitizer::class."::class)->sanitize($expression); ?>";
         });
     }
 

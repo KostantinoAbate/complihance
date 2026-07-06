@@ -1,0 +1,21 @@
+@use "../abstracts/mixins" as *;
+
+.complihance-preferences {
+    border: 1px solid c(border);
+    border-radius: r(2xl);
+    background: c(surface);
+    color: c(text);
+    padding: space(2xl);
+}
+
+.complihance-feedback {
+    margin-top: space(md);
+    font-size: 0.875rem;
+    color: c(success);
+}
+
+.complihance-error {
+    margin-top: space(md);
+    font-size: 0.875rem;
+    color: c(error);
+}

@@ -1,5 +1,5 @@
 import './complihance-api';
-import '../css/complihance.css';
+import '../scss/complihance.scss';
 
 import { initAccordions } from './modules/accordions';
 import { initConsentForm } from './modules/consent-form';

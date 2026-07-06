@@ -1,0 +1,16 @@
+@use "sass:map";
+@use "../abstracts/variables" as *;
+
+:root {
+    @each $name, $value in $z-indexes {
+        --#{$prefix}-z-#{$name}: #{$value};
+    }
+
+    @each $name, $value in $colors {
+        --#{$prefix}-color-#{$name}: #{$value};
+    }
+
+    @each $name, $value in $radii {
+        --#{$prefix}-radius-#{$name}: #{$value};
+    }
+}

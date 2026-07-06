@@ -5,7 +5,8 @@ namespace KostantinoAbate\Complihance\PolicyManagement;
 use InvalidArgumentException;
 use KostantinoAbate\Complihance\DTO\Policy;
 use KostantinoAbate\Complihance\Models\ComplihancePolicyAcceptance;
-use KostantinoAbate\Complihance\Support\PolicyAcceptanceSource;
+use KostantinoAbate\Complihance\Services\PolicyAcceptanceRecorder;
+use KostantinoAbate\Complihance\Services\PolicyAcceptanceStatusResolver;
 
 class PolicyManager
 {
@@ -39,6 +40,11 @@ class PolicyManager
         return array_keys(config('complihance.policies', []));
     }
 
+    /**
+     * Facade-friendly shortcut for manually recording a policy acceptance.
+     *
+     * The main consent flow should use PolicyAcceptanceRecorder directly.
+     */
     public function accept(
         string $key,
         mixed $subject = null,
@@ -50,91 +56,49 @@ class PolicyManager
         ?string $userAgent = null,
         array $metadata = [],
     ): ComplihancePolicyAcceptance {
-        $policy = $this->get($key);
-        $source = PolicyAcceptanceSource::normalize($source);
-
-        return ComplihancePolicyAcceptance::query()->create([
-            'consent_id' => $consentId,
-
-            'subject_type' => $subject ? $subject->getMorphClass() : null,
-            'subject_id' => $subject?->getKey(),
-
-            'session_id' => $sessionId ?? (
-                request()->hasSession() ? request()->session()->getId() : null
-            ),
-
-            'anonymous_id' => $anonymousId ?? request()->cookie(
-                config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
-            ),
-
-            'policy_key' => $policy->key,
-            'policy_version' => $policy->version,
-
-            'source' => $source,
-            'metadata' => $metadata,
-
-            'ip_address' => $ipAddress ?? request()->ip(),
-            'user_agent' => $userAgent ?? request()->userAgent(),
-
-            'accepted_at' => now(),
-        ]);
+        return app(PolicyAcceptanceRecorder::class)->recordManual(
+            key: $key,
+            subject: $subject,
+            source: $source,
+            consentId: $consentId,
+            anonymousId: $anonymousId,
+            sessionId: $sessionId,
+            ipAddress: $ipAddress,
+            userAgent: $userAgent,
+            metadata: $metadata,
+        );
     }
 
     public function hasAccepted(
         string $key,
         mixed $subject = null,
         ?string $source = null,
+        ?string $anonymousId = null,
+        ?string $sessionId = null,
     ): bool {
-        $policy = $this->get($key);
-
-        $query = ComplihancePolicyAcceptance::query()
-            ->where('policy_key', $policy->key)
-            ->where('policy_version', $policy->version);
-
-        if ($source) {
-            $query->where('source', $source);
-        }
-
-        if ($subject) {
-            return $query
-                ->where('subject_type', $subject->getMorphClass())
-                ->where('subject_id', $subject->getKey())
-                ->exists();
-        }
-
-        $anonymousId = request()->cookie(
-            config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
+        return app(PolicyAcceptanceStatusResolver::class)->hasAccepted(
+            key: $key,
+            subject: $subject,
+            source: $source,
+            anonymousId: $anonymousId,
+            sessionId: $sessionId,
         );
-
-        $sessionId = request()->hasSession()
-            ? request()->session()->getId()
-            : null;
-
-        if (! $anonymousId && ! $sessionId) {
-            return false;
-        }
-
-        $query->where(function ($query) use ($anonymousId, $sessionId) {
-            if ($anonymousId) {
-                $query->where('anonymous_id', $anonymousId);
-            }
-
-            if ($sessionId) {
-                $method = $anonymousId ? 'orWhere' : 'where';
-
-                $query->{$method}('session_id', $sessionId);
-            }
-        });
-
-        return $query->exists();
     }
 
     public function requiresAcceptance(
         string $key,
         mixed $subject = null,
         ?string $source = null,
+        ?string $anonymousId = null,
+        ?string $sessionId = null,
     ): bool {
-        return ! $this->hasAccepted($key, $subject, $source);
+        return ! $this->hasAccepted(
+            key: $key,
+            subject: $subject,
+            source: $source,
+            anonymousId: $anonymousId,
+            sessionId: $sessionId,
+        );
     }
 
     protected function repositoryFor(string $key)

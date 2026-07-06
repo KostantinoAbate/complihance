@@ -1,0 +1,73 @@
+@use "../abstracts/mixins" as *;
+
+.complihance-cookies {
+    display: grid;
+    gap: space(3xl);
+
+    &__section {
+        display: grid;
+        gap: space(lg);
+    }
+
+    &__title {
+        margin: 0;
+        color: c(text);
+        font-size: 1.125rem;
+        font-weight: 700;
+    }
+}
+
+.complihance-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid c(border);
+    border-radius: r(xl);
+    background: c(surface);
+}
+
+.complihance-table {
+    width: 100%;
+    min-width: 42rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.875rem;
+    color: c(text);
+
+    th,
+    td {
+        padding: 0.875rem space(lg);
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid c(border);
+    }
+
+    th {
+        background: c(soft);
+        color: c(muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    tbody {
+        tr {
+            &:last-child td {
+                border-bottom: 0;
+            }
+
+            &:hover td {
+                background: c(soft);
+            }
+        }
+    }
+}
+
+.complihance-cookie-name {
+    display: inline-block;
+    border-radius: 9999px;
+    background: #f1f5f9;
+    color: c(text);
+    padding: space(xs) space(sm);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+}

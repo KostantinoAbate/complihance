@@ -10,6 +10,18 @@ class CookieScanResult extends Model
 
     protected $guarded = [];
 
+    protected $fillable = [
+        'identity_hash',
+        'url',
+        'name',
+        'domain',
+        'path',
+        'secure',
+        'http_only',
+        'same_site',
+        'expires_at',
+    ];
+
     protected $casts = [
         'secure' => 'boolean',
         'http_only' => 'boolean',

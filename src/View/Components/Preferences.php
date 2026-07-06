@@ -2,10 +2,10 @@
 
 namespace KostantinoAbate\Complihance\View\Components;
 
-use Illuminate\Http\Request;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 use KostantinoAbate\Complihance\Services\ComplihanceDataRepository;
+use KostantinoAbate\Complihance\Services\CurrentConsentResolver;
 
 class Preferences extends Component
 {
@@ -23,16 +23,20 @@ class Preferences extends Component
 
     public function __construct(
         protected ComplihanceDataRepository $dataRepository,
-        protected Request $request,
+        protected CurrentConsentResolver $currentConsentResolver,
     ) {
         $this->texts = $this->dataRepository->texts();
+
         $this->categories = collect($this->dataRepository->categories())
             ->keyBy('key')
             ->all();
+
         $this->granularConsentEnabled = (bool) config('complihance.granular_consent.enabled', false);
+
         $this->vendorsByCategory = collect($this->dataRepository->vendors())
             ->filter(function (array $vendor) {
                 $categoryKey = $vendor['category'] ?? null;
+
                 if (! $categoryKey) {
                     return false;
                 }
@@ -42,28 +46,16 @@ class Preferences extends Component
             ->groupBy('category')
             ->map(fn ($vendors) => $vendors->keyBy('key')->all())
             ->all();
-        $currentConsent = $this->currentConsent();
-        $this->acceptedCategories = collect($currentConsent['accepted_categories'] ?? [])
+
+        $currentConsent = $this->currentConsentResolver->resolve(request());
+
+        $this->acceptedCategories = collect($currentConsent?->accepted_categories ?? [])
             ->values()
             ->all();
-        $this->acceptedVendors = collect($currentConsent['vendors'] ?? [])
+
+        $this->acceptedVendors = collect($currentConsent?->vendors ?? [])
             ->values()
             ->all();
-    }
-
-    protected function currentConsent(): array
-    {
-        $cookieName = config('complihance.cookie_name', 'complihance_consent');
-
-        $cookie = $this->request->cookie($cookieName);
-
-        if (! $cookie) {
-            return [];
-        }
-
-        $decoded = json_decode($cookie, true);
-
-        return is_array($decoded) ? $decoded : [];
     }
 
     public function render(): View

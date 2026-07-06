@@ -11,6 +11,7 @@ class ConsentModeRenderer
         protected ViewFactory $view,
         protected Request $request,
         protected ConsentModeService $consentMode,
+        protected CurrentConsentResolver $currentConsentResolver,
     ) {}
 
     public function render(): string
@@ -21,23 +22,12 @@ class ConsentModeRenderer
 
         $currentConsentMode = null;
 
-        $cookieName = config('complihance.cookie_name', 'complihance_consent');
-        $cookie = $this->request->cookies->get($cookieName);
+        $consent = $this->currentConsentResolver->resolve($this->request);
 
-        if ($cookie) {
-            $decoded = json_decode($cookie, true);
-
-            if (is_array($decoded)) {
-                $categories = $decoded['accepted_categories']
-                    ?? $decoded['categories']
-                    ?? [];
-
-                if (is_array($categories)) {
-                    $currentConsentMode = $this->consentMode->fromCategories(
-                        array_values(array_unique($categories))
-                    );
-                }
-            }
+        if ($consent && ! $consent->revoked_at) {
+            $currentConsentMode = $this->consentMode->fromCategories(
+                array_values(array_unique($consent->accepted_categories ?? []))
+            );
         }
 
         return $this->view->make('complihance::consent-mode', [

@@ -3,29 +3,32 @@
 namespace KostantinoAbate\Complihance\Http\Controllers\Api;
 
 use Illuminate\Routing\Controller;
-use KostantinoAbate\Complihance\Facades\ComplihancePolicy;
+use KostantinoAbate\Complihance\Http\Resources\ConfigurationResource;
 use KostantinoAbate\Complihance\Services\ComplihanceDataRepository;
+use KostantinoAbate\Complihance\Support\GranularConsent;
 
 class ConfigurationApiController extends Controller
 {
     public function show(ComplihanceDataRepository $data)
     {
-        return response()->json([
-            'locale' => app()->getLocale(),
+        return response()->json(
+            ConfigurationResource::make([
+                'categories' => config('complihance.categories', []),
+                'vendors' => GranularConsent::vendors(),
+                'granular_consent' => [
+                    'enabled' => config('complihance.granular_consent.enabled', false),
+                ],
+                'consent_mode' => [
+                    'enabled' => config('complihance.consent_mode.enabled', true),
+                ],
+                'policy' => [
+                    'version' => config('complihance.policies.cookie.version'),
+                ],
 
-            'texts' => $data->texts(),
-
-            'categories' => $data->categories(),
-
-            'cookies' => $data->cookies(),
-
-            'vendors' => config('complihance.granular_consent.enabled')
-                ? $data->vendors()
-                : [],
-
-            'cookie_policy_version' => ComplihancePolicy::currentVersion('cookie'),
-
-            'cookie_configuration_version' => config('complihance.cookie_configuration_version'),
-        ]);
+                'cookies' => [
+                    'version' => config('complihance.cookie_configuration_version'),
+                ],
+            ])
+        );
     }
 }

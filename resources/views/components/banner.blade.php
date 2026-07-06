@@ -1,45 +1,44 @@
 <div
     data-complihance-backdrop
-    class="fixed inset-0 z-[9998] bg-black/40"
+    class="complihance-backdrop"
 ></div>
 
 <div
     data-complihance-banner
-    class="fixed inset-x-0 bottom-0 z-[9999] max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white p-6 text-slate-900 shadow-2xl ring-1 ring-black/10 md:p-8"
+    class="complihance-banner"
 >
     <button
         type="button"
         data-complihance-reject
         aria-label="{{ __('Close cookie banner') }}"
-        class="absolute right-5 top-4 text-3xl leading-none text-slate-900"
+        class="complihance-banner__close"
     >
         ×
     </button>
 
-    <div class="pr-8">
+    <div class="complihance-banner__content">
         @if (! empty($texts['eyebrow']))
-            <p class="mb-1 text-xs text-slate-500">
+            <p class="complihance-eyebrow">
                 {{ $texts['eyebrow'] }}
             </p>
         @endif
 
         @if (! empty($texts['title']))
-            <h2 class="mb-2 text-xl font-bold leading-tight md:text-2xl">
+            <h2 class="complihance-title">
                 {{ $texts['title'] }}
             </h2>
         @endif
 
         @foreach (($texts['description'] ?? []) as $paragraph)
-            <p class="mb-1.5 text-xs leading-6 text-slate-700">
-                {!! $paragraph !!}
+            <p class="complihance-description">
+                @complihanceHtml($paragraph)
             </p>
         @endforeach
 
         @if (! empty(config('complihance.cookie_policy_url')) && ! empty($texts['cookie_policy_label']))
-            <p class="mb-5 text-xs">
+            <p class="complihance-policy-link">
                 <a
                     href="{{ config('complihance.cookie_policy_url') }}"
-                    class="font-medium underline underline-offset-2"
                     target="_blank"
                     rel="noopener"
                 >
@@ -52,7 +51,7 @@
     <form data-complihance-form>
         @csrf
 
-        <div class="mb-5 grid gap-3">
+        <div class="complihance-categories">
             @foreach ($categories as $key => $category)
                 @php
                     $required = (bool) ($category['required'] ?? false);
@@ -61,17 +60,17 @@
                 @endphp
 
                 <div
-                    class="rounded-xl border border-slate-200 p-4"
+                    class="complihance-card"
                     data-complihance-accordion
                 >
                     <button
                         type="button"
-                        class="flex w-full items-center gap-3 text-left"
+                        class="complihance-accordion__trigger complihance-row complihance-row--center"
                         data-complihance-accordion-trigger
                         aria-expanded="{{ $loop->first ? 'true' : 'false' }}"
                     >
                         <input
-                            class="mt-0.5 size-4 shrink-0 accent-slate-900 disabled:accent-slate-300"
+                            class="complihance-checkbox"
                             type="checkbox"
                             name="categories[]"
                             value="{{ $key }}"
@@ -85,14 +84,14 @@
 
                         <label
                             for="{{ $categoryInputId }}"
-                            class="cursor-pointer text-sm font-semibold {{ $required ? 'text-slate-500' : 'text-slate-900' }}"
+                            class="complihance-label {{ $required ? 'complihance-label--disabled' : '' }}"
                             onclick="event.stopPropagation()"
                         >
                             {{ $category['label'] ?? $key }}
                         </label>
 
                         <span
-                            class="ml-auto text-xl leading-none text-slate-500"
+                            class="complihance-accordion__icon"
                             data-complihance-accordion-icon
                         >
                             {{ $loop->first ? '−' : '+' }}
@@ -101,21 +100,21 @@
 
                     <div
                         data-complihance-accordion-panel
-                        class="grid transition-[grid-template-rows] duration-300 ease-in-out {{ $loop->first ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]' }}"
+                        class="complihance-accordion__panel {{ $loop->first ? 'complihance-accordion__panel--open' : '' }}"
                     >
-                        <div class="overflow-hidden">
+                        <div class="complihance-accordion__inner">
                             @if (! empty($category['description']))
-                                <p class="mt-3 pl-7 text-sm leading-6 text-slate-500">
+                                <p class="complihance-help">
                                     {{ $category['description'] }}
                                 </p>
                             @endif
 
                             @if ($granularConsentEnabled && ! empty($vendors))
-                                <div class="mt-4 ml-7 grid gap-2">
+                                <div class="complihance-vendors">
                                     @foreach ($vendors as $vendorKey => $vendor)
-                                        <label class="flex items-start gap-3 rounded-lg bg-slate-50 p-3">
+                                        <label class="complihance-vendor">
                                             <input
-                                                class="mt-1 size-4 accent-slate-900 disabled:accent-slate-300"
+                                                class="complihance-checkbox"
                                                 type="checkbox"
                                                 name="vendors[]"
                                                 value="{{ $vendorKey }}"
@@ -126,12 +125,12 @@
                                             >
 
                                             <span>
-                                                <strong class="block text-sm font-semibold">
+                                                <strong class="complihance-vendor__title">
                                                     {{ $vendor['label'] ?? $vendorKey }}
                                                 </strong>
 
                                                 @if (! empty($vendor['description']))
-                                                    <small class="mt-1 block text-xs leading-5 text-slate-500">
+                                                    <small class="complihance-vendor__description">
                                                         {{ $vendor['description'] }}
                                                     </small>
                                                 @endif
@@ -146,12 +145,12 @@
             @endforeach
         </div>
 
-        <div class="flex w-full flex-col gap-2 justify-between max-md:justify-center md:flex-row">
-            <div class="flex flex-col gap-2 justify-center md:flex-row">
+        <div class="complihance-actions">
+            <div class="complihance-actions__group">
                 <button
                     type="button"
                     data-complihance-reject
-                    class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
+                    class="complihance-button complihance-button--ghost"
                 >
                     {{ $texts['actions']['reject'] ?? __('Reject all') }}
                 </button>
@@ -159,7 +158,7 @@
                 <button
                     type="button"
                     data-complihance-save
-                    class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-200"
+                    class="complihance-button complihance-button--secondary"
                 >
                     {{ $texts['actions']['save'] ?? __('Save preferences') }}
                 </button>
@@ -168,7 +167,7 @@
             <button
                 type="button"
                 data-complihance-accept-all
-                class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                class="complihance-button complihance-button--primary"
             >
                 {{ $texts['actions']['accept_all'] ?? __('Accept all') }}
             </button>

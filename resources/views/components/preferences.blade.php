@@ -1,15 +1,15 @@
 <div
     data-complihance-preferences
-    class="rounded-2xl border border-slate-200 bg-white p-6 text-slate-900"
+    class="complihance-preferences"
 >
-    <h2 class="mb-4 text-xl font-bold">
+    <h2 class="complihance-title">
         {{ $texts['preferences']['title'] ?? __('Manage Cookie Preferences') }}
     </h2>
 
     <form data-complihance-form>
         @csrf
 
-        <div class="mb-5 grid gap-3">
+        <div class="complihance-categories">
             @foreach ($categories as $key => $category)
                 @php
                     $required = (bool) ($category['required'] ?? false);
@@ -18,10 +18,10 @@
                     $categoryChecked = $required || in_array($key, $acceptedCategories, true);
                 @endphp
 
-                <div class="rounded-xl border border-slate-200 p-4">
-                    <label class="flex items-start gap-3">
+                <div class="complihance-card">
+                    <label class="complihance-row">
                         <input
-                            class="mt-1 size-4 accent-slate-900 disabled:accent-slate-300"
+                            class="complihance-checkbox"
                             type="checkbox"
                             name="categories[]"
                             value="{{ $key }}"
@@ -33,12 +33,12 @@
                         >
 
                         <span>
-                            <strong class="block text-sm font-semibold {{ $required ? 'text-slate-500' : 'text-slate-900' }}">
+                            <strong class="complihance-label {{ $required ? 'complihance-label--disabled' : '' }}">
                                 {{ $category['label'] ?? $key }}
                             </strong>
 
                             @if (! empty($category['description']))
-                                <small class="mt-1 block text-sm leading-6 text-slate-500">
+                                <small class="complihance-vendor__description">
                                     {{ $category['description'] }}
                                 </small>
                             @endif
@@ -46,15 +46,15 @@
                     </label>
 
                     @if ($granularConsentEnabled && ! empty($vendors))
-                        <div class="mt-4 ml-7 grid gap-2">
+                        <div class="complihance-vendors">
                             @foreach ($vendors as $vendorKey => $vendor)
                                 @php
                                     $vendorChecked = $required || in_array($vendorKey, $acceptedVendors, true);
                                 @endphp
 
-                                <label class="flex items-start gap-3 rounded-lg bg-slate-50 p-3">
+                                <label class="complihance-vendor">
                                     <input
-                                        class="mt-1 size-4 accent-slate-900 disabled:accent-slate-300"
+                                        class="complihance-checkbox"
                                         type="checkbox"
                                         name="vendors[]"
                                         value="{{ $vendorKey }}"
@@ -65,12 +65,12 @@
                                     >
 
                                     <span>
-                                        <strong class="block text-sm font-semibold">
+                                        <strong class="complihance-vendor__title">
                                             {{ $vendor['label'] ?? $vendorKey }}
                                         </strong>
 
                                         @if (! empty($vendor['description']))
-                                            <small class="mt-1 block text-xs leading-5 text-slate-500">
+                                            <small class="complihance-vendor__description">
                                                 {{ $vendor['description'] }}
                                             </small>
                                         @endif
@@ -86,14 +86,14 @@
         <button
             type="button"
             data-complihance-save
-            class="hidden"
+            class="complihance-hidden"
         >
             {{ $texts['preferences']['save'] ?? __('Save preferences') }}
         </button>
 
         <p
             data-complihance-preferences-feedback
-            class="mt-3 hidden text-sm text-green-700"
+            class="complihance-feedback complihance-hidden"
         >
             {{ $texts['preferences']['saved'] ?? __('Preferences correctly updated!') }}
         </p>
@@ -102,7 +102,7 @@
     <button
         type="button"
         data-complihance-revoke
-        class="mt-4 rounded-lg bg-red-800 px-4 py-2 text-sm font-semibold text-red-50 hover:bg-red-700"
+        class="complihance-button complihance-button--danger"
     >
         {{ $texts['preferences']['revoke'] ?? __('Withdraw consent') }}
     </button>
