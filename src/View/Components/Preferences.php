@@ -14,6 +14,7 @@ class Preferences extends Component
     public array $categories;
 
     public bool $granularConsentEnabled;
+
     public array $vendorsByCategory;
 
     public array $acceptedCategories;
@@ -35,6 +36,7 @@ class Preferences extends Component
                 if (! $categoryKey) {
                     return false;
                 }
+
                 return ! (bool) ($this->categories[$categoryKey]['required'] ?? false);
             })
             ->groupBy('category')

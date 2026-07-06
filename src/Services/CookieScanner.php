@@ -2,7 +2,6 @@
 
 namespace KostantinoAbate\Complihance\Services;
 
-use Illuminate\Support\Facades\Http;
 use KostantinoAbate\Complihance\Models\CookieScanResult;
 
 class CookieScanner

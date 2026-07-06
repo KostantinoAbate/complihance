@@ -5,5 +5,5 @@ return [
         'title' => 'Contenuto bloccato',
         'description' => 'Questo contenuto richiede il consenso ai cookie :category.',
         'button' => 'Accetta e visualizza',
-    ]
+    ],
 ];
