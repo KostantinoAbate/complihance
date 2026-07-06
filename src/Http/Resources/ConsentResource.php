@@ -2,8 +2,6 @@
 
 namespace KostantinoAbate\Complihance\Http\Resources;
 
-use Illuminate\Http\Request;
-
 class ConsentResource
 {
     public static function current(array $payload): array

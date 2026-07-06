@@ -63,7 +63,7 @@ class ComplihanceServiceProvider extends PackageServiceProvider
         });
 
         Blade::directive('complihanceHtml', function ($expression) {
-            return "<?php echo app(".ComplihanceHtmlSanitizer::class."::class)->sanitize($expression); ?>";
+            return '<?php echo app('.ComplihanceHtmlSanitizer::class."::class)->sanitize($expression); ?>";
         });
     }
 
