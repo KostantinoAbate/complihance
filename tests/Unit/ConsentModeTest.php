@@ -5,7 +5,7 @@ use KostantinoAbate\Complihance\Services\Rendering\ComplihanceDataRepository;
 use KostantinoAbate\Complihance\Services\Rendering\ConsentModeService;
 
 beforeEach(function () {
-    Config::set('complihance.data.categories_path', __DIR__ . '/../Fixtures/categories.json');
+    Config::set('complihance.data.categories_path', __DIR__.'/../Fixtures/categories.json');
 
     Config::set('complihance.consent_mode.default', [
         'ad_storage' => 'denied',

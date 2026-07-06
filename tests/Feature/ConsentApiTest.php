@@ -2,9 +2,9 @@
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
-use KostantinoAbate\Complihance\Models\Consent;
 use KostantinoAbate\Complihance\Facades\ComplihancePolicy;
 use KostantinoAbate\Complihance\Models\ComplihancePolicyAcceptance;
+use KostantinoAbate\Complihance\Models\Consent;
 use KostantinoAbate\Complihance\Services\Policies\PolicyAcceptanceRecorder;
 
 uses(RefreshDatabase::class);
