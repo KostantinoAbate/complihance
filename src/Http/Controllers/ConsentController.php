@@ -5,7 +5,7 @@ namespace KostantinoAbate\Complihance\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use KostantinoAbate\Complihance\Actions\StoreConsentAction;
+use KostantinoAbate\Complihance\Actions\Consent\StoreConsentAction;
 
 class ConsentController extends Controller
 {

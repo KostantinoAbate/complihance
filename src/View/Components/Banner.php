@@ -4,8 +4,8 @@ namespace KostantinoAbate\Complihance\View\Components;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
-use KostantinoAbate\Complihance\Services\BannerVisibilityResolver;
-use KostantinoAbate\Complihance\Services\ComplihanceDataRepository;
+use KostantinoAbate\Complihance\Services\Rendering\ComplihanceDataRepository;
+use KostantinoAbate\Complihance\Services\Rendering\Resolver\BannerVisibilityResolver;
 
 class Banner extends Component
 {

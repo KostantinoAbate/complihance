@@ -37,16 +37,26 @@ function syncVendorsFromCategory(form, categoryInput) {
 }
 
 export function initConsentForm(container) {
+    if (container.dataset.complihanceInitialized === 'true') return;
+
+    container.dataset.complihanceInitialized = 'true';
+
     const form = container.querySelector('[data-complihance-form]');
     const backdrop = document.querySelector('[data-complihance-backdrop]');
 
     if (!form) return;
 
     let isSavingConsent = false;
+    let pendingSave = false;
+    let autoSaveTimeout = null;
+    let isSyncing = false;
+
+    const isPreferences = container.matches('[data-complihance-preferences]');
+    const isBanner = container.matches('[data-complihance-banner]');
 
     const getSelectedCategories = () => {
         return Array.from(form.querySelectorAll('input[name="categories[]"]'))
-            .filter((input) => input.checked || input.indeterminate)
+            .filter((input) => input.checked || input.indeterminate || input.dataset.required === 'true')
             .map((input) => input.value);
     };
 
@@ -57,9 +67,7 @@ export function initConsentForm(container) {
 
     const getConsentPayload = () => {
         const payload = {
-            source: container.matches('[data-complihance-preferences]')
-                ? 'preferences'
-                : 'banner',
+            source: isPreferences ? 'preferences' : 'banner',
             categories: getSelectedCategories(),
         };
 
@@ -71,6 +79,18 @@ export function initConsentForm(container) {
     };
 
     const setFormLoading = (loading) => {
+        /**
+         * Nel partial preferenze evitiamo di disabilitare i checkbox:
+         * il flash spesso nasce proprio da disabled -> enabled ad ogni autosave.
+         */
+        if (isPreferences) {
+            container
+                .querySelector('[data-complihance-save]')
+                ?.toggleAttribute('disabled', loading);
+
+            return;
+        }
+
         form.querySelectorAll('button, input').forEach((element) => {
             if (element.dataset.required === 'true') return;
 
@@ -98,24 +118,41 @@ export function initConsentForm(container) {
             ?.classList.add('complihance-hidden');
     };
 
+    const syncCategoryFromVendorsSafely = (categoryInput) => {
+        isSyncing = true;
+        syncCategoryFromVendors(form, categoryInput);
+        isSyncing = false;
+    };
+
+    const syncVendorsFromCategorySafely = (categoryInput) => {
+        isSyncing = true;
+        syncVendorsFromCategory(form, categoryInput);
+        isSyncing = false;
+    };
+
     const saveConsent = async () => {
-        if (isSavingConsent) return;
+        if (isSavingConsent) {
+            pendingSave = true;
+            return;
+        }
 
         isSavingConsent = true;
+        pendingSave = false;
+
         setFormLoading(true);
         clearFormError();
 
         try {
             const payload = getConsentPayload();
 
-            const response = container.matches('[data-complihance-preferences]')
+            const response = isPreferences
                 ? await window.Complihance.updatePreferences(payload)
                 : await window.Complihance.savePreferences(payload);
 
             updateConsentMode(payload.categories);
             refreshBlockedContent();
 
-            if (container.matches('[data-complihance-banner]')) {
+            if (isBanner) {
                 container.remove();
                 backdrop?.remove();
             }
@@ -141,18 +178,29 @@ export function initConsentForm(container) {
         } finally {
             isSavingConsent = false;
             setFormLoading(false);
+
+            if (pendingSave) {
+                saveConsent();
+            }
         }
     };
 
+    const scheduleAutoSave = () => {
+        if (!isPreferences || isSyncing) return;
+
+        clearTimeout(autoSaveTimeout);
+
+        autoSaveTimeout = setTimeout(() => {
+            saveConsent();
+        }, 350);
+    };
+
     form.querySelectorAll('[data-complihance-category]').forEach((categoryInput) => {
-        syncCategoryFromVendors(form, categoryInput);
+        syncCategoryFromVendorsSafely(categoryInput);
 
         categoryInput.addEventListener('change', () => {
-            syncVendorsFromCategory(form, categoryInput);
-
-            if (container.matches('[data-complihance-preferences]')) {
-                saveConsent();
-            }
+            syncVendorsFromCategorySafely(categoryInput);
+            scheduleAutoSave();
         });
     });
 
@@ -161,12 +209,10 @@ export function initConsentForm(container) {
             const categoryInput = getCategoryInputByVendorInput(form, vendorInput);
 
             if (categoryInput) {
-                syncCategoryFromVendors(form, categoryInput);
+                syncCategoryFromVendorsSafely(categoryInput);
             }
 
-            if (container.matches('[data-complihance-preferences]')) {
-                saveConsent();
-            }
+            scheduleAutoSave();
         });
     });
 
@@ -194,15 +240,13 @@ export function initConsentForm(container) {
         });
 
         form.querySelectorAll('input[name="vendors[]"]').forEach((input) => {
-            const categoryInput = getCategoryInputByVendorInput(form, input);
-
-            input.checked = categoryInput?.dataset.required === 'true';
+            input.checked = false;
         });
 
         saveConsent();
     });
 
-    document.querySelectorAll('[data-complihance-revoke]').forEach((button) => {
+    container.querySelectorAll('[data-complihance-revoke]').forEach((button) => {
         button.addEventListener('click', async () => {
             await window.Complihance.revoke();
 

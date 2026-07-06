@@ -5,12 +5,12 @@ namespace KostantinoAbate\Complihance\Http\Controllers\Api;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use KostantinoAbate\Complihance\Actions\ResolveCurrentConsentAction;
-use KostantinoAbate\Complihance\Actions\RevokeConsentAction;
-use KostantinoAbate\Complihance\Actions\StoreConsentAction;
-use KostantinoAbate\Complihance\Actions\UpdateConsentAction;
-use KostantinoAbate\Complihance\Services\ConsentResponseFactory;
-use KostantinoAbate\Complihance\Support\ConsentPayloadBuilder;
+use KostantinoAbate\Complihance\Actions\Consent\ResolveCurrentConsentAction;
+use KostantinoAbate\Complihance\Actions\Consent\RevokeConsentAction;
+use KostantinoAbate\Complihance\Actions\Consent\StoreConsentAction;
+use KostantinoAbate\Complihance\Actions\Consent\UpdateConsentAction;
+use KostantinoAbate\Complihance\Services\Consent\ConsentPayloadBuilder;
+use KostantinoAbate\Complihance\Services\Consent\ConsentResponseFactory;
 
 class ConsentApiController extends Controller
 {

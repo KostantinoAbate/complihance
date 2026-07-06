@@ -4,8 +4,8 @@ namespace KostantinoAbate\Complihance\Http\Controllers\Api;
 
 use Illuminate\Routing\Controller;
 use KostantinoAbate\Complihance\Http\Resources\ConfigurationResource;
-use KostantinoAbate\Complihance\Services\ComplihanceDataRepository;
-use KostantinoAbate\Complihance\Support\GranularConsent;
+use KostantinoAbate\Complihance\Services\Consent\GranularConsent;
+use KostantinoAbate\Complihance\Services\Rendering\ComplihanceDataRepository;
 
 class ConfigurationApiController extends Controller
 {

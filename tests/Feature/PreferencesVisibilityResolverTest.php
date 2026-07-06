@@ -3,7 +3,7 @@
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use KostantinoAbate\Complihance\Models\Consent;
-use KostantinoAbate\Complihance\Services\PreferencesVisibilityResolver;
+use KostantinoAbate\Complihance\Services\Rendering\Resolver\PreferencesVisibilityResolver;
 
 uses(RefreshDatabase::class);
 

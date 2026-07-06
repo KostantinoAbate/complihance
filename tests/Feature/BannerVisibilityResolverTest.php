@@ -4,7 +4,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use KostantinoAbate\Complihance\Facades\ComplihancePolicy;
 use KostantinoAbate\Complihance\Models\Consent;
-use KostantinoAbate\Complihance\Services\BannerVisibilityResolver;
+use KostantinoAbate\Complihance\Services\Rendering\Resolver\BannerVisibilityResolver;
 
 uses(RefreshDatabase::class);
 

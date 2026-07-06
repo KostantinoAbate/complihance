@@ -3,7 +3,7 @@
 namespace KostantinoAbate\Complihance\Commands;
 
 use Illuminate\Console\Command;
-use KostantinoAbate\Complihance\Services\CookieScanner;
+use KostantinoAbate\Complihance\Actions\Cookies\ScanCookiesAction;
 
 class ScanCookiesCommand extends Command
 {
@@ -14,9 +14,9 @@ class ScanCookiesCommand extends Command
 
     protected $description = 'Scan URLs, store detected cookies and add missing cookies to the published cookies JSON file.';
 
-    public function handle(CookieScanner $scanner): int
+    public function handle(ScanCookiesAction $scanCookies): int
     {
-        $result = $scanner->scan(
+        $result = $scanCookies->execute(
             urls: $this->argument('url'),
             httpHeaderOnly: (bool) $this->option('http-header-only'),
             acceptConsent: ! (bool) $this->option('no-consent'),

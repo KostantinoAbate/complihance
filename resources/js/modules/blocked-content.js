@@ -173,11 +173,7 @@ async function acceptInlineConsent(element) {
         vendors: Array.from(selectedVendors),
     };
 
-    console.log('[Complihance inline consent payload]', payload);
-
     const response = await window.Complihance.updatePreferences(payload);
-
-    console.log('[Complihance inline consent response]', response);
 
     refreshBlockedContent();
 }

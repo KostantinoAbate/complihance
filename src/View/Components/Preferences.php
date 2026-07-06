@@ -4,8 +4,8 @@ namespace KostantinoAbate\Complihance\View\Components;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
-use KostantinoAbate\Complihance\Services\ComplihanceDataRepository;
-use KostantinoAbate\Complihance\Services\CurrentConsentResolver;
+use KostantinoAbate\Complihance\Services\Consent\Resolver\CurrentConsentResolver;
+use KostantinoAbate\Complihance\Services\Rendering\ComplihanceDataRepository;
 
 class Preferences extends Component
 {
