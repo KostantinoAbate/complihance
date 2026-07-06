@@ -13,7 +13,7 @@ class ConfigurationApiController extends Controller
     {
         return response()->json(
             ConfigurationResource::make([
-                'categories' => config('complihance.categories', []),
+                'categories' => $data->categories(),
                 'vendors' => GranularConsent::vendors(),
                 'granular_consent' => [
                     'enabled' => config('complihance.granular_consent.enabled', false),
@@ -24,7 +24,6 @@ class ConfigurationApiController extends Controller
                 'policy' => [
                     'version' => config('complihance.policies.cookie.version'),
                 ],
-
                 'cookies' => [
                     'version' => config('complihance.cookie_configuration_version'),
                 ],

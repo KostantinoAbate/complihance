@@ -5,6 +5,8 @@ namespace KostantinoAbate\Complihance\Services\Policies;
 use InvalidArgumentException;
 use KostantinoAbate\Complihance\Data\Policy;
 use KostantinoAbate\Complihance\Models\ComplihancePolicyAcceptance;
+use KostantinoAbate\Complihance\Services\Policies\Repositories\BladePolicyRepository;
+use KostantinoAbate\Complihance\Services\Policies\Repositories\DatabasePolicyRepository;
 
 class PolicyManager
 {

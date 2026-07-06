@@ -9,6 +9,7 @@ class CookieScanner
     public function __construct(
         protected CookieJsonWriter $cookieWriter,
         protected BrowserCookieScanner $browserScanner,
+        protected SetCookieHeaderParser $setCookieHeaderParser,
     ) {}
 
     public function scan(
@@ -61,5 +62,32 @@ class CookieScanner
             'added_to_json' => $addedToJson,
             'detected' => count($detectedCookieNames),
         ];
+    }
+
+    protected function scanHttpHeaders(array $urls): array
+    {
+        $cookies = [];
+
+        foreach ($urls as $url) {
+            $headers = get_headers($url, true);
+
+            if (! $headers || ! isset($headers['Set-Cookie'])) {
+                continue;
+            }
+
+            $setCookies = is_array($headers['Set-Cookie'])
+                ? $headers['Set-Cookie']
+                : [$headers['Set-Cookie']];
+
+            foreach ($setCookies as $setCookie) {
+                $cookie = $this->setCookieHeaderParser->parse($setCookie, $url);
+
+                if ($cookie !== null) {
+                    $cookies[] = $cookie;
+                }
+            }
+        }
+
+        return $cookies;
     }
 }

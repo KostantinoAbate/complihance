@@ -1,0 +1,38 @@
+{
+    "ga": {
+        "category": "analytics",
+        "vendor": "Google Analytics",
+        "pattern": "^_ga$",
+        "translations": {
+            "en": {
+                "name": "Google Analytics",
+                "description": "Analytics cookie.",
+                "duration": "2 years"
+            }
+        }
+    },
+    "meta_pixel": {
+        "category": "marketing",
+        "vendor": "Meta Pixel",
+        "pattern": "^_fbp$",
+        "translations": {
+            "en": {
+                "name": "Meta Pixel",
+                "description": "Marketing cookie.",
+                "duration": "3 months"
+            }
+        }
+    },
+    "complihance_consent": {
+        "category": "necessary",
+        "vendor": "Complihance",
+        "pattern": "^complihance_consent$",
+        "translations": {
+            "en": {
+                "name": "Consent cookie",
+                "description": "Stores consent preferences.",
+                "duration": "12 months"
+            }
+        }
+    }
+}

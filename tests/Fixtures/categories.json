@@ -1,0 +1,46 @@
+{
+    "necessary": {
+        "required": true,
+        "enabled": true,
+        "consent_mode": ["security_storage"],
+        "translations": {
+            "en": {
+                "label": "Strictly necessary cookies",
+                "description": "Required cookies."
+            }
+        }
+    },
+    "analytics": {
+        "required": false,
+        "enabled": true,
+        "consent_mode": ["analytics_storage"],
+        "translations": {
+            "en": {
+                "label": "Analytics cookies",
+                "description": "Analytics cookies."
+            }
+        }
+    },
+    "marketing": {
+        "required": false,
+        "enabled": true,
+        "consent_mode": ["ad_storage", "ad_user_data", "ad_personalization"],
+        "translations": {
+            "en": {
+                "label": "Marketing cookies",
+                "description": "Marketing cookies."
+            }
+        }
+    },
+    "functional": {
+        "required": false,
+        "enabled": true,
+        "consent_mode": ["functionality_storage", "personalization_storage"],
+        "translations": {
+            "en": {
+                "label": "Functional cookies",
+                "description": "Functional cookies."
+            }
+        }
+    }
+}

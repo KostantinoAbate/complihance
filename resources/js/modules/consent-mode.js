@@ -1,14 +1,20 @@
-function categoriesArrayToObject(categories) {
-    return categories.reduce((carry, category) => {
-        carry[category] = true;
-        return carry;
-    }, {});
+function categoriesToObject(categories) {
+    if (!categories) return {};
+
+    if (Array.isArray(categories)) {
+        return categories.reduce((carry, category) => {
+            carry[category] = true;
+            return carry;
+        }, {});
+    }
+
+    return categories;
 }
 
 export function updateConsentMode(categories) {
     if (typeof window.gtag !== 'function') return;
 
-    const selectedCategories = categoriesArrayToObject(categories);
+    const selectedCategories = categoriesToObject(categories);
 
     window.gtag('consent', 'update', {
         analytics_storage: selectedCategories.analytics ? 'granted' : 'denied',

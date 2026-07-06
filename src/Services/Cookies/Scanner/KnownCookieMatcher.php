@@ -22,6 +22,6 @@ class KnownCookieMatcher
 
     protected function patterns(): array
     {
-        return require __DIR__.'/../Support/known-cookie-patterns.php';
+        return require __DIR__.'/known-cookie-patterns.php';
     }
 }

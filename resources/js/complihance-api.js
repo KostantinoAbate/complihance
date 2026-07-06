@@ -14,6 +14,9 @@
         configuration: null,
         configurationPromise: null,
 
+        preferenceUpdatedCallback: null,
+        preferenceUpdateErrorCallback: null,
+
         callbacks: [],
 
         options: {
@@ -266,6 +269,54 @@
         }
     }
 
+    function onPreferenceUpdated(callback) {
+        if (typeof callback !== 'function') {
+            return;
+        }
+
+        state.preferenceUpdatedCallback = callback;
+    }
+
+    function onPreferenceUpdateError(callback) {
+        if (typeof callback !== 'function') {
+            return;
+        }
+
+        state.preferenceUpdateErrorCallback = callback;
+    }
+
+    function dispatchPreferenceUpdated(payload) {
+        window.dispatchEvent(
+            new CustomEvent('complihance:preference-updated', {
+                detail: payload,
+            })
+        );
+
+        if (!state.preferenceUpdatedCallback) {
+            return false;
+        }
+
+        state.preferenceUpdatedCallback(payload);
+
+        return true;
+    }
+
+    function dispatchPreferenceUpdateError(payload) {
+        window.dispatchEvent(
+            new CustomEvent('complihance:preference-update-error', {
+                detail: payload,
+            })
+        );
+
+        if (!state.preferenceUpdateErrorCallback) {
+            return false;
+        }
+
+        state.preferenceUpdateErrorCallback(payload);
+
+        return true;
+    }
+
     window.Complihance = {
         ...(window.Complihance || {}),
 
@@ -292,6 +343,10 @@
 
         onConsentChanged,
         dispatchConsentChanged,
+        onPreferenceUpdated,
+        onPreferenceUpdateError,
+        dispatchPreferenceUpdated,
+        dispatchPreferenceUpdateError,
 
         _state: state,
     };

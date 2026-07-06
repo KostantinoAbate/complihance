@@ -157,23 +157,50 @@ export function initConsentForm(container) {
                 backdrop?.remove();
             }
 
-            const feedback = container.querySelector('[data-complihance-preferences-feedback]');
+            const successPayload = {
+                response,
+                payload,
+                source: isPreferences ? 'preferences' : 'banner',
+                container,
+                form,
+            };
 
-            if (feedback) {
-                feedback.classList.remove('complihance-hidden');
+            const wasHandled = window.Complihance.dispatchPreferenceUpdated?.(successPayload);
+
+            if (!wasHandled) {
+                const feedback = container.querySelector('[data-complihance-preferences-feedback]');
+
+                if (feedback) {
+                    feedback.classList.remove('complihance-hidden');
+                }
             }
 
             window.dispatchEvent(new CustomEvent('complihance:consent-saved', {
                 detail: response,
             }));
         } catch (error) {
-            showFormError(
+            const errorMessage =
                 window.ComplihanceConfig?.texts?.errors?.save_consent
-                || 'Unable to save your cookie preferences. Please try again.'
-            );
+                || 'Unable to save your cookie preferences. Please try again.';
+
+            const errorPayload = {
+                error,
+                message: errorMessage,
+                source: isPreferences ? 'preferences' : 'banner',
+                container,
+                form,
+            };
+
+            const wasHandled = window.Complihance.dispatchPreferenceUpdateError?.(errorPayload);
+
+            if (wasHandled) {
+                clearFormError();
+            } else {
+                showFormError(errorMessage);
+            }
 
             window.dispatchEvent(new CustomEvent('complihance:consent-error', {
-                detail: error,
+                detail: errorPayload,
             }));
         } finally {
             isSavingConsent = false;

@@ -1,0 +1,26 @@
+{
+    "complihance_consent": {
+        "category": "necessary",
+        "vendor": "Complihance",
+        "pattern": "^complihance_consent$",
+        "translations": {
+            "en": {
+                "name": "Consent cookie",
+                "description": "Stores consent preferences.",
+                "duration": "12 months"
+            }
+        }
+    },
+    "complihance_anonymous_id": {
+        "category": "necessary",
+        "vendor": "Complihance",
+        "pattern": "^complihance_anonymous_id$",
+        "translations": {
+            "en": {
+                "name": "Anonymous visitor identifier",
+                "description": "Stores anonymous visitor id.",
+                "duration": "12 months"
+            }
+        }
+    }
+}

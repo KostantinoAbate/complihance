@@ -2,6 +2,8 @@
 
 namespace KostantinoAbate\Complihance\Services\Consent\Resolver;
 
+use KostantinoAbate\Complihance\Services\Consent\GranularConsent;
+
 class VendorConsentResolver
 {
     public function resolve(array $categories, array $vendors): array
