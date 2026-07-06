@@ -18,8 +18,7 @@ class ConsentModeService
         $payload = $this->defaultPayload();
 
         foreach (
-            $this->data->consentModeMapping()
-            as $categoryKey => $consentModeKeys
+            $this->data->consentModeMapping() as $categoryKey => $consentModeKeys
         ) {
             $granted = array_is_list($categories)
                 ? in_array($categoryKey, $categories, true)

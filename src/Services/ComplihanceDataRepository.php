@@ -40,7 +40,7 @@ class ComplihanceDataRepository
     public function requiredCategoryKeys(): array
     {
         return collect($this->rawCategories())
-            ->filter(fn(array $category) => ($category['required'] ?? false) === true)
+            ->filter(fn (array $category) => ($category['required'] ?? false) === true)
             ->keys()
             ->values()
             ->all();
@@ -49,7 +49,7 @@ class ComplihanceDataRepository
     public function consentModeMapping(): array
     {
         return collect($this->rawCategories())
-            ->mapWithKeys(fn(array $category, string $key) => [
+            ->mapWithKeys(fn (array $category, string $key) => [
                 $key => $category['consent_mode'] ?? [],
             ])
             ->filter()
@@ -140,7 +140,7 @@ class ComplihanceDataRepository
 
     protected function readJson(string $path): array
     {
-        if (!File::exists($path)) {
+        if (! File::exists($path)) {
             return [];
         }
 
