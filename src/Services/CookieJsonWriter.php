@@ -17,7 +17,8 @@ class CookieJsonWriter
 
         $this->ensureFileExists($path);
 
-        $cookies = $this->repository->rawCookies();
+        $rawCookies = $this->repository->rawCookies();
+        $cookies = $this->normalizeDefinitions($rawCookies);
 
         $added = 0;
 
@@ -32,7 +33,7 @@ class CookieJsonWriter
             $added++;
         }
 
-        if ($added === 0) {
+        if ($added === 0 && $cookies === $rawCookies) {
             return 0;
         }
 
@@ -49,16 +50,17 @@ class CookieJsonWriter
             'complihance_consent' => [
                 'category' => 'necessary',
                 'vendor' => 'Complihance',
-                'duration' => '12 months',
                 'pattern' => '^complihance_consent$',
                 'translations' => [
                     'en' => [
                         'name' => 'Consent cookie',
                         'description' => 'Stores the user cookie consent preferences.',
+                        'duration' => '12 months',
                     ],
                     'it' => [
                         'name' => 'Cookie di consenso',
                         'description' => 'Memorizza le preferenze di consenso cookie dell’utente.',
+                        'duration' => '12 mesi',
                     ],
                 ],
             ],
@@ -66,16 +68,17 @@ class CookieJsonWriter
             'complihance_anonymous_id' => [
                 'category' => 'necessary',
                 'vendor' => 'Complihance',
-                'duration' => '12 months',
                 'pattern' => '^complihance_anonymous_id$',
                 'translations' => [
                     'en' => [
                         'name' => 'Anonymous visitor identifier',
                         'description' => 'Stores an anonymous identifier used to associate consent records with anonymous visitors.',
+                        'duration' => '12 months',
                     ],
                     'it' => [
                         'name' => 'Identificativo anonimo visitatore',
                         'description' => 'Memorizza un identificativo anonimo usato per associare i consensi ai visitatori anonimi.',
+                        'duration' => '12 mesi',
                     ],
                 ],
             ],
@@ -126,16 +129,12 @@ class CookieJsonWriter
         return [
             'category' => 'unclassified',
             'vendor' => null,
-            'duration' => 'Session',
             'pattern' => '^'.preg_quote($cookieName, '/').'$',
             'translations' => [
                 'en' => [
                     'name' => $cookieName,
                     'description' => null,
-                ],
-                'it' => [
-                    'name' => $cookieName,
-                    'description' => null,
+                    'duration' => 'Session',
                 ],
             ],
         ];
@@ -147,5 +146,44 @@ class CookieJsonWriter
                 $data,
                 JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
             ).PHP_EOL;
+    }
+
+    protected function normalizeDefinitions(array $cookies): array
+    {
+        return collect($cookies)
+            ->map(fn (array $cookie, string $cookieName) => $this->normalizeDefinition($cookie, $cookieName))
+            ->all();
+    }
+
+    protected function normalizeDefinition(array $cookie, string $cookieName): array
+    {
+        $translations = $cookie['translations'] ?? [];
+
+        $rootDescription = $cookie['description'] ?? null;
+        $rootDuration = $cookie['duration'] ?? null;
+
+        unset($cookie['description'], $cookie['duration']);
+
+        $translations['en'] = [
+            'name' => $translations['en']['name'] ?? $cookieName,
+            'description' => $translations['en']['description'] ?? $rootDescription,
+            'duration' => $translations['en']['duration'] ?? $rootDuration ?? 'Session',
+        ];
+
+        foreach ($translations as $locale => $translation) {
+            if ($locale === 'en') {
+                continue;
+            }
+
+            $translations[$locale] = [
+                'name' => $translation['name'] ?? $translations['en']['name'],
+                'description' => $translation['description'] ?? $translations['en']['description'],
+                'duration' => $translation['duration'] ?? $translations['en']['duration'],
+            ];
+        }
+
+        $cookie['translations'] = $translations;
+
+        return $cookie;
     }
 }

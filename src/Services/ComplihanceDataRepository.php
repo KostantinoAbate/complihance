@@ -127,6 +127,7 @@ class ComplihanceDataRepository
 
         $translation = $translations[$locale]
             ?? $translations[$fallbackLocale]
+            ?? $translations['en']
             ?? [];
 
         unset($item['translations']);

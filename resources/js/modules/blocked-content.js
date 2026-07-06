@@ -37,10 +37,6 @@ function getBlockedContentRequirement(element) {
     return element.dataset.complihanceRequires || null;
 }
 
-function getBlockedContentPlaceholder(element) {
-    return element.dataset.complihancePlaceholder || 'default';
-}
-
 function hasInlineConsent(element) {
     return element.dataset.complihanceInlineConsent !== 'false';
 }
@@ -87,30 +83,13 @@ function canLoadBlockedContent(element) {
     return window.Complihance.canUseVendor(vendor);
 }
 
-function getBlockedContentText(element) {
-    const vendor = getBlockedContentVendor(element);
-    const placeholder = getBlockedContentPlaceholder(element);
-    const requirement = getBlockedContentRequirement(element);
-
-    let category = getBlockedContentCategory(element);
-
-    if (!category && vendor) {
-        category = inferCategoryFromVendor(vendor);
-    }
-
-    const placeholders = window.ComplihanceConfig?.blockedContent?.placeholders || {};
-    const text = placeholders[placeholder] || placeholders.default || {};
-
-    const fallbackDescription = requirement === 'all-optional'
-        ? 'Questo contenuto richiede il consenso ai cookie opzionali.'
-        : 'Questo contenuto richiede il consenso :category.';
+function getBlockedContentText() {
+    const text = window.ComplihanceConfig?.blockedContent?.placeholder || {};
 
     return {
-        title: text.title || 'Contenuto bloccato',
-        description: (text.description || fallbackDescription)
-            .replace(':category', category || 'opzionali')
-            .replace(':vendor', vendor || ''),
-        button: text.button || 'Accetta e visualizza',
+        title: text.title || 'Blocked content',
+        description: text.description || 'This content requires consent.',
+        button: text.button || 'Accept and view',
     };
 }
 

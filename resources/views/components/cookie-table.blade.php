@@ -11,9 +11,9 @@
                         <thead>
                         <tr>
                             <th class="border px-3 py-2 text-left">Cookie</th>
-                            <th class="border px-3 py-2 text-left">Vendor</th>
-                            <th class="border px-3 py-2 text-left">Durata</th>
-                            <th class="border px-3 py-2 text-left">Descrizione</th>
+                            <th class="border px-3 py-2 text-left">{{ __('Vendor') }}</th>
+                            <th class="border px-3 py-2 text-left">{{ __('Duration') }}</th>
+                            <th class="border px-3 py-2 text-left">{{ __('Description') }}</th>
                         </tr>
                         </thead>
 

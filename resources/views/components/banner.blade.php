@@ -11,7 +11,7 @@
     <button
         type="button"
         data-complihance-reject
-        aria-label="Chiudi banner cookie"
+        aria-label="{{ __('Close cookie banner') }}"
         class="absolute right-5 top-4 text-3xl leading-none text-slate-900"
     >
         ×
@@ -154,7 +154,7 @@
                     data-complihance-reject
                     class="rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100"
                 >
-                    {{ $texts['actions']['reject'] ?? 'Rifiuta tutto' }}
+                    {{ $texts['actions']['reject'] ?? __('Reject all') }}
                 </button>
 
                 <button
@@ -162,7 +162,7 @@
                     data-complihance-save
                     class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-200"
                 >
-                    {{ $texts['actions']['save'] ?? 'Salva preferenze' }}
+                    {{ $texts['actions']['save'] ?? __('Save preferences') }}
                 </button>
             </div>
 
@@ -171,7 +171,7 @@
                 data-complihance-accept-all
                 class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
             >
-                {{ $texts['actions']['accept_all'] ?? 'Accetta tutto' }}
+                {{ $texts['actions']['accept_all'] ?? __('Accept all') }}
             </button>
         </div>
     </form>

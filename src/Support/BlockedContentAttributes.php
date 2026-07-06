@@ -10,7 +10,6 @@ class BlockedContentAttributes
         ?string $category = null,
         ?string $src = null,
         ?string $vendor = null,
-        ?string $placeholder = null,
         bool $inlineConsent = true,
     ): HtmlString {
         $attributes = [
@@ -30,10 +29,6 @@ class BlockedContentAttributes
 
         if ($vendor !== null && $vendor !== '') {
             $attributes['data-complihance-vendor'] = $vendor;
-        }
-
-        if ($placeholder !== null && $placeholder !== '') {
-            $attributes['data-complihance-placeholder'] = $placeholder;
         }
 
         return new HtmlString(

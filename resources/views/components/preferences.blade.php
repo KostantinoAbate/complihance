@@ -4,7 +4,7 @@
     class="rounded-2xl border border-slate-200 bg-white p-6 text-slate-900"
 >
     <h2 class="mb-4 text-xl font-bold">
-        {{ $texts['preferences']['title'] ?? 'Gestisci preferenze cookie' }}
+        {{ $texts['preferences']['title'] ?? __('Manage Cookie Preferences') }}
     </h2>
 
     <form data-complihance-form>
@@ -89,14 +89,14 @@
             data-complihance-save
             class="hidden"
         >
-            {{ $texts['preferences']['save'] ?? 'Salva preferenze' }}
+            {{ $texts['preferences']['save'] ?? __('Save preferences') }}
         </button>
 
         <p
             data-complihance-preferences-feedback
             class="mt-3 hidden text-sm text-green-700"
         >
-            {{ $texts['preferences']['saved'] ?? 'Preferenze aggiornate correttamente.' }}
+            {{ $texts['preferences']['saved'] ?? __('Preferences correctly updated!') }}
         </p>
     </form>
 
@@ -105,6 +105,6 @@
         data-complihance-revoke
         class="mt-4 rounded-lg bg-red-800 px-4 py-2 text-sm font-semibold text-red-50 hover:bg-red-700"
     >
-        {{ $texts['preferences']['revoke'] ?? 'Revoca consenso' }}
+        {{ $texts['preferences']['revoke'] ?? __('Withdraw consent') }}
     </button>
 </div>

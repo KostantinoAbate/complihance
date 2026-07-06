@@ -2,32 +2,34 @@
     "complihance_consent": {
         "category": "necessary",
         "vendor": "Complihance",
-        "duration": "12 months",
         "pattern": "^complihance_consent$",
         "translations": {
             "en": {
                 "name": "Consent cookie",
-                "description": "Stores the user cookie consent preferences."
+                "description": "Stores the user cookie consent preferences.",
+                "duration": "12 months"
             },
             "it": {
                 "name": "Cookie di consenso",
-                "description": "Memorizza le preferenze di consenso cookie dell’utente."
+                "description": "Memorizza le preferenze di consenso cookie dell’utente.",
+                "duration": "12 mesi"
             }
         }
     },
     "complihance_anonymous_id": {
         "category": "necessary",
         "vendor": "Complihance",
-        "duration": "12 months",
         "pattern": "^complihance_anonymous_id$",
         "translations": {
             "en": {
                 "name": "Anonymous visitor identifier",
-                "description": "Stores an anonymous identifier used to associate consent records with anonymous visitors."
+                "description": "Stores an anonymous identifier used to associate consent records with anonymous visitors.",
+                "duration": "12 months"
             },
             "it": {
                 "name": "Identificativo anonimo visitatore",
-                "description": "Memorizza un identificativo anonimo usato per associare i consensi ai visitatori anonimi."
+                "description": "Memorizza un identificativo anonimo usato per associare i consensi ai visitatori anonimi.",
+                "duration": "12 mesi"
             }
         }
     }
