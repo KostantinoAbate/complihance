@@ -5,5 +5,5 @@ return [
         'title' => 'Blocked content',
         'description' => 'This content requires :category consent.',
         'button' => 'Accept and view',
-    ]
+    ],
 ];
