@@ -14,16 +14,16 @@ class BrowserScanner
     /**
      * Scan URLs with Playwright and collect cookies, storage entries, and scripts.
      *
-     * @param array<int, string> $urls
+     * @param  array<int, string>  $urls
      * @return array{cookies: array<int, array<string, mixed>>, storage: array<int, array<string, mixed>>, scripts: array<int, array<string, mixed>>}
+     *
      * @throws JsonException|FileNotFoundException
      */
     public function scan(
-        array   $urls,
-        bool    $acceptConsent = true,
+        array $urls,
+        bool $acceptConsent = true,
         ?string $setupScript = null,
-    ): array
-    {
+    ): array {
         $scriptPath = $this->createTemporaryScript($urls, $acceptConsent, $setupScript);
 
         try {
@@ -31,19 +31,19 @@ class BrowserScanner
             $process->setTimeout(120);
             $process->run();
 
-            if (!$process->isSuccessful()) {
+            if (! $process->isSuccessful()) {
                 throw new RuntimeException(
-                    "Browser cookie scanning failed.\n\n" .
-                    "Make sure Node.js, Playwright, Chromium and the required system dependencies are installed.\n\n" .
-                    "Install Playwright in your Laravel application:\n" .
-                    "npm install -D playwright\n" .
-                    "npx playwright install chromium\n\n" .
-                    "In Docker/Linux environments, make sure Chromium system dependencies are installed in the image.\n\n" .
-                    "Alternatively, run the HTTP-only scanner:\n" .
-                    "php artisan complihance:scan-cookies <url> --http-header-only\n\n" .
-                    "Exit code: {$process->getExitCode()}\n\n" .
-                    "STDERR:\n" . $process->getErrorOutput() . "\n\n" .
-                    "STDOUT:\n" . $process->getOutput()
+                    "Browser cookie scanning failed.\n\n".
+                    "Make sure Node.js, Playwright, Chromium and the required system dependencies are installed.\n\n".
+                    "Install Playwright in your Laravel application:\n".
+                    "npm install -D playwright\n".
+                    "npx playwright install chromium\n\n".
+                    "In Docker/Linux environments, make sure Chromium system dependencies are installed in the image.\n\n".
+                    "Alternatively, run the HTTP-only scanner:\n".
+                    "php artisan complihance:scan-cookies <url> --http-header-only\n\n".
+                    "Exit code: {$process->getExitCode()}\n\n".
+                    "STDERR:\n".$process->getErrorOutput()."\n\n".
+                    "STDOUT:\n".$process->getOutput()
                 );
             }
 
@@ -57,7 +57,7 @@ class BrowserScanner
                 ];
             }
 
-            if (!is_array($result)) {
+            if (! is_array($result)) {
                 return [
                     'cookies' => [],
                     'storage' => [],
@@ -86,16 +86,16 @@ class BrowserScanner
     /**
      * Create the temporary Playwright script used for scanning.
      *
-     * @param array<int, string> $urls
+     * @param  array<int, string>  $urls
+     *
      * @throws JsonException|FileNotFoundException
      */
     protected function createTemporaryScript(
-        array   $urls,
-        bool    $acceptConsent,
+        array $urls,
+        bool $acceptConsent,
         ?string $setupScript = null,
-    ): string
-    {
-        $path = storage_path('framework/cache/complihance-cookie-scan-' . Str::uuid() . '.mjs');
+    ): string {
+        $path = storage_path('framework/cache/complihance-cookie-scan-'.Str::uuid().'.mjs');
 
         File::ensureDirectoryExists(dirname($path));
 
@@ -107,16 +107,16 @@ class BrowserScanner
     /**
      * Build the Playwright script content.
      *
-     * @param array<int, string> $urls
+     * @param  array<int, string>  $urls
+     *
      * @throws JsonException
      * @throws FileNotFoundException
      */
     protected function script(
-        array   $urls,
-        bool    $acceptConsent,
+        array $urls,
+        bool $acceptConsent,
         ?string $setupScript = null,
-    ): string
-    {
+    ): string {
         $setupScript = $setupScript !== null
             ? realpath($setupScript) ?: $setupScript
             : null;
@@ -130,7 +130,7 @@ class BrowserScanner
         $encodedAcceptConsentJson = json_encode($encodedAcceptConsent, JSON_THROW_ON_ERROR);
 
         $template = File::get(
-            dirname(__DIR__, 5) . '/resources/js/scanner/browser-scanner.mjs.stub'
+            dirname(__DIR__, 5).'/resources/js/scanner/browser-scanner.mjs.stub'
         );
 
         return strtr($template, [
