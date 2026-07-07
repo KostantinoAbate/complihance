@@ -3,9 +3,11 @@
 namespace KostantinoAbate\Complihance;
 
 use Illuminate\Support\Facades\Blade;
+use KostantinoAbate\Complihance\Commands\ExportConsentsCommand;
 use KostantinoAbate\Complihance\Commands\ResetCommand;
 use KostantinoAbate\Complihance\Commands\RetentionCommand;
 use KostantinoAbate\Complihance\Commands\ScanCookiesCommand;
+use KostantinoAbate\Complihance\Commands\ScanDiffCommand;
 use KostantinoAbate\Complihance\Services\Cookies\BlockedContent\BlockedContentAttributes;
 use KostantinoAbate\Complihance\Services\Policies\PolicyManager;
 use KostantinoAbate\Complihance\Services\Rendering\ComplihanceScriptRenderer;
@@ -24,7 +26,7 @@ class ComplihanceServiceProvider extends PackageServiceProvider
     {
         $this->publishes([
             __DIR__.'/../resources/data/categories.json' => resource_path('vendor/complihance/categories.json'),
-            __DIR__.'/../resources/data/cookies.json' => resource_path('vendor/complihance/cookies.json'),
+            __DIR__.'/../resources/data/techbologies.json' => resource_path('vendor/complihance/techbologies.json'),
             __DIR__.'/../resources/data/texts.json' => resource_path('vendor/complihance/texts.json'),
         ], 'complihance-data');
 
@@ -91,7 +93,13 @@ class ComplihanceServiceProvider extends PackageServiceProvider
             ->discoversMigrations()
             ->hasViewComponents('complihance', Banner::class, Preferences::class, CookieTable::class)
             ->hasTranslations()
-            ->hasCommands(RetentionCommand::class, ScanCookiesCommand::class, ResetCommand::class)
+            ->hasCommands(
+                RetentionCommand::class,
+                ScanCookiesCommand::class,
+                ResetCommand::class,
+                ExportConsentsCommand::class,
+                ScanDiffCommand::class,
+            )
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()

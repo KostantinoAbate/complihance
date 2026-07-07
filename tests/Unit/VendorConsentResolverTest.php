@@ -5,7 +5,7 @@ use KostantinoAbate\Complihance\Services\Consent\Resolver\VendorConsentResolver;
 
 beforeEach(function () {
     Config::set('complihance.granular_consent.enabled', true);
-    Config::set('complihance.data.cookies_path', __DIR__.'/../Fixtures/granular-cookies.json');
+    Config::set('complihance.data.technologies_path', __DIR__.'/../Fixtures/granular-cookies.json');
 });
 
 it('accepts selected vendor when its category is accepted', function () {

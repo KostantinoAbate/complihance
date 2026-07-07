@@ -6,11 +6,14 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
-class BrowserCookieScanner
+class BrowserScanner
 {
-    public function scan(array $urls, bool $acceptConsent = true): array
-    {
-        $scriptPath = $this->createTemporaryScript($urls, $acceptConsent);
+    public function scan(
+        array $urls,
+        bool $acceptConsent = true,
+        ?string $setupScript = null,
+    ): array {
+        $scriptPath = $this->createTemporaryScript($urls, $acceptConsent, $setupScript);
 
         try {
             $process = new Process(['node', $scriptPath]);
@@ -33,31 +36,54 @@ class BrowserCookieScanner
                 );
             }
 
-            $cookies = json_decode($process->getOutput(), true);
+            $result = json_decode($process->getOutput(), true);
 
-            if (! is_array($cookies)) {
-                return [];
+            if (! is_array($result)) {
+                return [
+                    'cookies' => [],
+                    'storage' => [],
+                    'scripts' => [],
+                ];
             }
 
-            return $cookies;
+            if (array_is_list($result)) {
+                return [
+                    'cookies' => $result,
+                    'storage' => [],
+                    'scripts' => [],
+                ];
+            }
+
+            return [
+                'cookies' => $result['cookies'] ?? [],
+                'storage' => $result['storage'] ?? [],
+                'scripts' => $result['scripts'] ?? [],
+            ];
         } finally {
             File::delete($scriptPath);
         }
     }
 
-    protected function createTemporaryScript(array $urls, bool $acceptConsent): string
-    {
+    protected function createTemporaryScript(
+        array $urls,
+        bool $acceptConsent,
+        ?string $setupScript = null,
+    ): string {
         $path = storage_path('framework/cache/complihance-cookie-scan-'.Str::uuid().'.mjs');
 
         File::ensureDirectoryExists(dirname($path));
 
-        File::put($path, $this->script($urls, $acceptConsent));
+        File::put($path, $this->script($urls, $acceptConsent, $setupScript));
 
         return $path;
     }
 
-    protected function script(array $urls, bool $acceptConsent): string
-    {
+    protected function script(
+        array $urls,
+        bool $acceptConsent,
+        ?string $setupScript = null,
+    ): string {
+        $encodedSetupScript = json_encode($setupScript, JSON_THROW_ON_ERROR);
         $encodedUrls = json_encode(array_values($urls), JSON_THROW_ON_ERROR);
         $acceptConsentValue = $acceptConsent ? 'true' : 'false';
 
@@ -66,6 +92,7 @@ import { chromium } from 'playwright';
 
 const urls = {$encodedUrls};
 const acceptConsent = {$acceptConsentValue};
+const setupScriptPath = {$encodedSetupScript};
 
 const browser = await chromium.launch({
     headless: true,
@@ -74,10 +101,36 @@ const browser = await chromium.launch({
 
 const context = await browser.newContext();
 const page = await context.newPage();
+if (setupScriptPath) {
+    try {
+        const setupModule = await import(setupScriptPath);
+        const setup = setupModule.default || setupModule.setup;
+
+        if (typeof setup !== 'function') {
+            throw new Error('Setup script must export a default function or a named setup function.');
+        }
+
+        await setup({ page, context, browser });
+    } catch (error) {
+        console.error('Failed to execute setup script.');
+        console.error(error.message);
+        process.exit(3);
+    }
+}
 const scannedCookies = new Map();
+const scannedStorageItems = new Map();
+const scannedScripts = new Map();
 
 function cookieKey(cookie) {
     return `\${cookie.name}|\${cookie.domain || ''}|\${cookie.path || '/'}`;
+}
+
+function storageKey(item) {
+    return `\${item.type}|\${item.key}|\${item.url}`;
+}
+
+function scriptKey(script) {
+    return `\${script.src}|\${script.url}`;
 }
 
 function normalizeCookie(cookie, url) {
@@ -93,6 +146,67 @@ function normalizeCookie(cookie, url) {
             ? new Date(cookie.expires * 1000).toISOString()
             : null,
     };
+}
+
+function normalizeStorageItem(type, key, value, url) {
+    return {
+        type,
+        key,
+        value_preview: String(value).slice(0, 200),
+        url,
+    };
+}
+
+function normalizeScript(src, url) {
+    return {
+        type: 'script',
+        src,
+        url,
+    };
+}
+
+async function collectStorage(page, url) {
+    const storageItems = await page.evaluate(() => {
+        const localStorageItems = Object.entries(window.localStorage).map(([key, value]) => ({
+            type: 'local_storage',
+            key,
+            value,
+        }));
+
+        const sessionStorageItems = Object.entries(window.sessionStorage).map(([key, value]) => ({
+            type: 'session_storage',
+            key,
+            value,
+        }));
+
+        return [...localStorageItems, ...sessionStorageItems];
+    });
+
+    storageItems.forEach((item) => {
+        const normalized = normalizeStorageItem(item.type, item.key, item.value, url);
+        const key = storageKey(normalized);
+
+        if (! scannedStorageItems.has(key)) {
+            scannedStorageItems.set(key, normalized);
+        }
+    });
+}
+
+async function collectScripts(page, url) {
+    const scripts = await page.evaluate(() =>
+        Array.from(document.scripts)
+            .map((script) => script.src)
+            .filter(Boolean)
+    );
+
+    scripts.forEach((src) => {
+        const normalized = normalizeScript(src, url);
+        const key = scriptKey(normalized);
+
+        if (! scannedScripts.has(key)) {
+            scannedScripts.set(key, normalized);
+        }
+    });
 }
 
 async function acceptComplihanceConsent(page) {
@@ -148,11 +262,18 @@ for (const url of urls) {
             scannedCookies.set(key, normalizeCookie(cookie, url));
         }
     });
+
+    await collectStorage(page, url);
+    await collectScripts(page, url);
 }
 
 await browser.close();
 
-console.log(JSON.stringify(Array.from(scannedCookies.values())));
+console.log(JSON.stringify({
+    cookies: Array.from(scannedCookies.values()),
+    storage: Array.from(scannedStorageItems.values()),
+    scripts: Array.from(scannedScripts.values()),
+}));
 JS;
     }
 }

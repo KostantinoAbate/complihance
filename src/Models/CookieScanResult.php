@@ -3,6 +3,7 @@
 namespace KostantinoAbate\Complihance\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CookieScanResult extends Model
 {
@@ -10,21 +11,15 @@ class CookieScanResult extends Model
 
     protected $guarded = [];
 
-    protected $fillable = [
-        'identity_hash',
-        'url',
-        'name',
-        'domain',
-        'path',
-        'secure',
-        'http_only',
-        'same_site',
-        'expires_at',
-    ];
-
     protected $casts = [
         'secure' => 'boolean',
         'http_only' => 'boolean',
         'expires_at' => 'datetime',
+        'metadata' => 'array',
     ];
+
+    public function scan(): BelongsTo
+    {
+        return $this->belongsTo(CookieScan::class, 'scan_id');
+    }
 }

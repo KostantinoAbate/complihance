@@ -9,7 +9,7 @@ use KostantinoAbate\Complihance\Services\Rendering\ComplihanceDataRepository;
 
 class CookieTable extends Component
 {
-    public Collection $cookiesByCategory;
+    public Collection $technologiesByCategory;
 
     public array $categories;
 
@@ -17,18 +17,22 @@ class CookieTable extends Component
         protected ComplihanceDataRepository $dataRepository,
         public ?string $category = null,
     ) {
-        $this->cookiesByCategory = collect($this->dataRepository->cookies())
-            ->map(fn (array $cookie) => [
-                'name' => $cookie['key'],
-                'category' => $cookie['category'],
-                'vendor' => $cookie['vendor'] ?? null,
-                'duration' => $cookie['duration'] ?? null,
-                'description' => $cookie['description'] ?? null,
+        $this->technologiesByCategory = collect($this->dataRepository->technologies())
+            ->map(fn (array $technology) => [
+                'name' => $technology['key'],
+                'technology' => $technology['technology'] ?? [
+                        'type' => 'cookie',
+                        'label' => 'Cookie',
+                    ],
+                'category' => $technology['category'],
+                'vendor' => $technology['vendor'] ?? null,
+                'duration' => $technology['duration'] ?? null,
+                'description' => $technology['description'] ?? null,
             ])
             ->when(
                 $this->category,
-                fn (Collection $cookies) => $cookies->filter(
-                    fn (array $cookie) => $cookie['category'] === $this->category
+                fn (Collection $technologies) => $technologies->filter(
+                    fn (array $technology) => $technology['category'] === $this->category
                 )
             )
             ->groupBy('category');

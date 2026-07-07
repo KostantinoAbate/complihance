@@ -12,7 +12,7 @@ beforeEach(function () {
     Config::set('complihance.consent_mode.enabled', true);
 
     Config::set('complihance.data.categories_path', __DIR__.'/../Fixtures/categories.json');
-    Config::set('complihance.data.cookies_path', __DIR__.'/../Fixtures/granular-cookies.json');
+    Config::set('complihance.data.technologies_path', __DIR__.'/../Fixtures/granular-cookies.json');
 });
 
 it('returns configuration categories as array with key', function () {
