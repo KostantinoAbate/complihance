@@ -21,9 +21,9 @@ class CookieTable extends Component
             ->map(fn (array $technology) => [
                 'name' => $technology['key'],
                 'technology' => $technology['technology'] ?? [
-                        'type' => 'cookie',
-                        'label' => 'Cookie',
-                    ],
+                    'type' => 'cookie',
+                    'label' => 'Cookie',
+                ],
                 'category' => $technology['category'],
                 'vendor' => $technology['vendor'] ?? null,
                 'duration' => $technology['duration'] ?? null,

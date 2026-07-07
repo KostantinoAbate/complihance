@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\File;
 use KostantinoAbate\Complihance\Models\CookieScan;
 use KostantinoAbate\Complihance\Services\Cookies\Scanner\BrowserScanner;
 use KostantinoAbate\Complihance\Services\Cookies\Scanner\JsonWriter;
-use KostantinoAbate\Complihance\Services\Cookies\Scanner\Scanner;
 use KostantinoAbate\Complihance\Services\Cookies\Scanner\Patterns\TechnologyMatcher;
+use KostantinoAbate\Complihance\Services\Cookies\Scanner\Scanner;
 use KostantinoAbate\Complihance\Services\Cookies\Scanner\SetCookieHeaderParser;
 
 beforeEach(function () {
