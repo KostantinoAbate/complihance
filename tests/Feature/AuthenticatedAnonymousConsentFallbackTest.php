@@ -1,13 +1,13 @@
 <?php
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use KostantinoAbate\Complihance\Models\Consent;
 use KostantinoAbate\Complihance\Services\Consent\Resolver\CurrentConsentResolver;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 uses(RefreshDatabase::class);
 
