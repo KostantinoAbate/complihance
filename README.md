@@ -1,9 +1,10 @@
 # Complihance
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/kostantinoabate/complihance.svg?style=flat-square)](https://packagist.org/packages/kostantinoabate/complihance)
-[![GitHub Tests Action Status](https://github.com/spatie/package-complihance-laravel/actions/workflows/run-tests.yml/badge.svg)](https://github.com/kostantinoabate/complihance/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://github.com/spatie/package-complihance-laravel/actions/workflows/fix-php-code-style-issues.yml/badge.svg)](https://github.com/kostantinoabate/complihance/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/kostantinoabate/complihance.svg?style=flat-square)](https://packagist.org/packages/kostantinoabate/complihance)
+[![GitHub Tests Action Status](https://github.com/KostantinoAbate/complihance/actions/workflows/run-tests.yml/badge.svg?branch=main)](https://github.com/KostantinoAbate/complihance/actions/workflows/run-tests.yml)
+[![GitHub Code Style Action Status](https://github.com/KostantinoAbate/complihance/actions/workflows/fix-php-code-style-issues.yml/badge.svg?branch=main)](https://github.com/KostantinoAbate/complihance/actions/workflows/fix-php-code-style-issues.yml)
+[![License](https://img.shields.io/packagist/l/kostantinoabate/complihance.svg?style=flat-square)](https://github.com/KostantinoAbate/complihance/blob/main/LICENSE.md)
 
 A Laravel package for cookie consent, policy acceptance, consent persistence, Google Consent Mode, cookie scanning and blocked embedded content.
 
