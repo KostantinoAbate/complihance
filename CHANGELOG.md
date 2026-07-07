@@ -5,15 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased](https://github.com/KostantinoAbate/complihance/compare/Complihance - 1.0.1...HEAD)
 
-## [1.0.1] - 2026-07-07
+## [1.0.1](https://github.com/KostantinoAbate/complihance/compare/v1.0.0...v1.0.1) - 2026-07-07
 
 ### Fixed
 
 - Fixed browser scanner stub path resolution in CI and package installations.
 
-## [1.0.0] - 2026-07-07
+## [1.0.0](https://github.com/KostantinoAbate/complihance/releases/tag/v1.0.0) - 2026-07-07
 
 ### Added
 
@@ -46,6 +46,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Consent retention cleanup command.
 - Package installation command.
 
-[Unreleased]: https://github.com/KostantinoAbate/complihance/compare/v1.0.1...HEAD
-[1.0.1]: https://github.com/KostantinoAbate/complihance/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/KostantinoAbate/complihance/releases/tag/v1.0.0
+## [Complihance - 1.0.1](https://github.com/KostantinoAbate/complihance/compare/v1.0.1...Complihance - 1.0.1) - 2026-07-07
+
+### 🎉 First stable release
+
+Complihance is a Laravel package for cookie consent, privacy policies and consent tracking, designed to provide a complete and customizable consent management solution.
+
+#### Highlights
+
+- 🍪 Cookie consent banner
+- ⚙️ Cookie preferences page
+- 📊 Google Consent Mode integration
+- 🎯 Granular vendor-level consent
+- 📝 Policy versioning and consent renewal
+- 🗄️ Consent persistence and audit log
+- 🔄 Consent history tracking
+- 🌐 HTTP API and JavaScript SDK
+- 🔍 Cookie scanner (HTTP headers + Playwright)
+- 🧩 Automatic cookie classification
+- 🚫 Preventive iframe and embedded content blocking
+- 📤 Consent export and retention commands
+- 🎨 Fully publishable and customizable Blade views
+
+#### Compatibility
+
+- PHP 8.4+
+- Laravel 12.x
+- Laravel 13.x
+
+See the README for installation and usage instructions.
