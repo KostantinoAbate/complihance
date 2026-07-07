@@ -77,6 +77,10 @@ it('stores a scan session when scanning http headers', function () {
         acceptConsent: false,
     );
 
+    $scan = CookieScan::query()
+        ->where('uuid', $result['scan_uuid'])
+        ->firstOrFail();
+
     expect($result)
         ->toHaveKeys([
             'scan_id',
@@ -85,11 +89,8 @@ it('stores a scan session when scanning http headers', function () {
             'added_to_technologies_json',
             'detected',
         ])
-        ->and(CookieScan::query()->count())->toBe(1);
-
-    $scan = CookieScan::query()->first();
-
-    expect($scan->uuid)->toBe($result['scan_uuid'])
+        ->and(CookieScan::query()->count())->toBe(1)
+        ->and($scan->uuid)->toBe($result['scan_uuid'])
         ->and($scan->urls)->toBe(['https://example.com'])
         ->and($scan->options)->toBe([
             'http_header_only' => true,

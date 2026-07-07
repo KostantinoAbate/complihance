@@ -130,7 +130,7 @@ class BrowserScanner
         $encodedAcceptConsentJson = json_encode($encodedAcceptConsent, JSON_THROW_ON_ERROR);
 
         $template = File::get(
-            dirname(__DIR__, 5) . '/resources/js/scanner/browser-scanner.mjs.stub'
+            dirname(__DIR__, 4) . '/resources/js/scanner/browser-scanner.mjs.stub'
         );
 
         return strtr($template, [

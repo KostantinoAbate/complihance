@@ -172,7 +172,7 @@ class ScanPersister
             'status' => 'completed',
             'summary' => $summary,
             'finished_at' => now(),
-        ]);
+        ])->save();
     }
 
     /**
@@ -186,6 +186,6 @@ class ScanPersister
                 'error' => $message,
             ],
             'finished_at' => now(),
-        ]);
+        ])->save();
     }
 }

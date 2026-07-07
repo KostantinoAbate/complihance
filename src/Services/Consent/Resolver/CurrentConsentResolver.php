@@ -44,11 +44,29 @@ class CurrentConsentResolver
         }
 
         if (auth()->check()) {
-            return Consent::query()
+            $userConsent = Consent::query()
                 ->whereNull('revoked_at')
                 ->whereMorphedTo('subject', auth()->user())
                 ->latest('accepted_at')
                 ->first();
+
+            if ($userConsent) {
+                return $userConsent;
+            }
+
+            $anonymousId = $request->cookie(
+                config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')
+            );
+
+            if ($anonymousId) {
+                return Consent::query()
+                    ->whereNull('revoked_at')
+                    ->where('anonymous_id', $anonymousId)
+                    ->latest('accepted_at')
+                    ->first();
+            }
+
+            return null;
         }
 
         $anonymousId = $request->cookie(
