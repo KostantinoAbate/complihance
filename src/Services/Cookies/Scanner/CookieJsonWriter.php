@@ -3,6 +3,7 @@
 namespace KostantinoAbate\Complihance\Services\Cookies\Scanner;
 
 use Illuminate\Support\Facades\File;
+use KostantinoAbate\Complihance\Services\Cookies\Scanner\Patterns\KnownCookieMatcher;
 use KostantinoAbate\Complihance\Services\Rendering\ComplihanceDataRepository;
 
 class CookieJsonWriter
@@ -51,6 +52,10 @@ class CookieJsonWriter
             'complihance_consent' => [
                 'category' => 'necessary',
                 'vendor' => 'Complihance',
+                'technology' => [
+                    'type' => 'cookie',
+                    'label' => 'Cookie',
+                ],
                 'pattern' => '^complihance_consent$',
                 'translations' => [
                     'en' => [
@@ -69,6 +74,10 @@ class CookieJsonWriter
             'complihance_anonymous_id' => [
                 'category' => 'necessary',
                 'vendor' => 'Complihance',
+                'technology' => [
+                    'type' => 'cookie',
+                    'label' => 'Cookie',
+                ],
                 'pattern' => '^complihance_anonymous_id$',
                 'translations' => [
                     'en' => [
@@ -130,6 +139,10 @@ class CookieJsonWriter
         return [
             'category' => 'unclassified',
             'vendor' => null,
+            'technology' => [
+                'type' => 'cookie',
+                'label' => 'Cookie',
+            ],
             'pattern' => '^'.preg_quote($cookieName, '/').'$',
             'translations' => [
                 'en' => [
@@ -183,6 +196,10 @@ class CookieJsonWriter
             ];
         }
 
+        $cookie['technology'] = $cookie['technology'] ?? [
+            'type' => 'cookie',
+            'label' => 'Cookie',
+        ];
         $cookie['translations'] = $translations;
 
         return $cookie;

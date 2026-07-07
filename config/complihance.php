@@ -75,9 +75,9 @@ return [
             resource_path('vendor/complihance/categories.json')
         ),
 
-        'cookies_path' => env(
-            'COMPLIHANCE_COOKIES_PATH',
-            resource_path('vendor/complihance/cookies.json')
+        'technologies_path' => env(
+            'COMPLIHANCE_TECHNOLOGIES_PATH',
+            resource_path('vendor/complihance/technologies.json')
         ),
 
         'texts_path' => env(
@@ -284,8 +284,20 @@ return [
     | without a nonce attribute.
     |
     */
-
     'csp_nonce' => null,
 
     'csp_nonce_resolver' => null,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scanner
+    |--------------------------------------------------------------------------
+    |
+    | Configure Complihance Cookie Scanner
+    | - sitemap_limit:
+    |
+    */
+    'scanner' => [
+        'sitemap_limit' => env('COMPLIHANCE_SCANNER_SITEMAP_LIMIT', 100),
+    ],
 ];

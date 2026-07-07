@@ -14,11 +14,13 @@ class ScanCookiesAction
         array|string $urls,
         bool $httpHeaderOnly = false,
         bool $acceptConsent = true,
+        ?string $setupScript = null,
     ): array {
         return $this->scanner->scan(
             urls: is_array($urls) ? $urls : [$urls],
             httpHeaderOnly: $httpHeaderOnly,
             acceptConsent: $acceptConsent,
+            setupScript: $setupScript,
         );
     }
 }

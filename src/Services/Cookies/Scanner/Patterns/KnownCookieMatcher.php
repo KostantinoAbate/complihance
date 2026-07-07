@@ -1,6 +1,6 @@
 <?php
 
-namespace KostantinoAbate\Complihance\Services\Cookies\Scanner;
+namespace KostantinoAbate\Complihance\Services\Cookies\Scanner\Patterns;
 
 use Illuminate\Support\Arr;
 
@@ -12,6 +12,10 @@ class KnownCookieMatcher
             if (preg_match($cookie['pattern'], $name) === 1) {
                 return [
                     ...Arr::except($cookie, ['pattern']),
+                    'technology' => $cookie['technology'] ?? [
+                        'type' => 'cookie',
+                        'label' => 'Cookie',
+                    ],
                     'pattern' => trim($cookie['pattern'], '/'),
                 ];
             }

@@ -12,6 +12,7 @@
                         <tr>
                             <th class="border px-3 py-2 text-left">Cookie</th>
                             <th class="border px-3 py-2 text-left">{{ __('Vendor') }}</th>
+                            <th class="border px-3 py-2 text-left">{{ __('Technology') }}</th>
                             <th class="border px-3 py-2 text-left">{{ __('Duration') }}</th>
                             <th class="border px-3 py-2 text-left">{{ __('Description') }}</th>
                         </tr>
@@ -26,6 +27,10 @@
 
                                 <td class="border px-3 py-2">
                                     {{ $cookie['vendor'] ?? '-' }}
+                                </td>
+
+                                <td class="border px-3 py-2">
+                                    {{ $cookie['technology']['label'] ?? 'Cookie' }}
                                 </td>
 
                                 <td class="border px-3 py-2">

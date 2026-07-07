@@ -2,66 +2,88 @@
 
 namespace KostantinoAbate\Complihance\Services\Cookies\Scanner;
 
-use KostantinoAbate\Complihance\Models\CookieScanResult;
-
 class CookieScanner
 {
     public function __construct(
         protected CookieJsonWriter $cookieWriter,
         protected BrowserCookieScanner $browserScanner,
         protected SetCookieHeaderParser $setCookieHeaderParser,
+        protected CookieScanPersister $persister,
     ) {}
 
     public function scan(
         array $urls,
         bool $httpHeaderOnly = false,
         bool $acceptConsent = true,
+        ?string $setupScript = null,
     ): array {
-        $cookies = $httpHeaderOnly
-            ? $this->scanHttpHeaders($urls)
-            : $this->browserScanner->scan($urls, $acceptConsent);
+        $scan = $this->persister->start($urls, [
+            'http_header_only' => $httpHeaderOnly,
+            'accept_consent' => $acceptConsent,
+            'setup_script' => $setupScript,
+        ]);
 
-        $stored = 0;
-        $detectedCookieNames = [];
-
-        foreach ($cookies as $cookie) {
-            $identityHash = hash('sha256', implode('|', [
-                $cookie['name'] ?? '',
-                $cookie['domain'] ?? '',
-                $cookie['path'] ?? '/',
-            ]));
-
-            CookieScanResult::updateOrCreate(
-                [
-                    'identity_hash' => $identityHash,
-                ],
-                [
-                    'name' => $cookie['name'],
-                    'domain' => $cookie['domain'] ?? null,
-                    'path' => $cookie['path'] ?? '/',
-                    'url' => $cookie['url'],
-                    'secure' => $cookie['secure'],
-                    'http_only' => $cookie['http_only'],
-                    'same_site' => $cookie['same_site'],
-                    'expires_at' => $cookie['expires_at'],
+        try {
+            $scanResult = $httpHeaderOnly
+                ? [
+                    'cookies' => $this->scanHttpHeaders($urls),
+                    'storage' => [],
+                    'scripts' => [],
                 ]
-            );
+                : $this->browserScanner->scan($urls, $acceptConsent, $setupScript);
 
-            $detectedCookieNames[] = $cookie['name'];
-            $stored++;
+            $cookies = $scanResult['cookies'] ?? [];
+            $storageItems = $scanResult['storage'] ?? [];
+            $scripts = $scanResult['scripts'] ?? [];
+
+            $stored = 0;
+            $detectedCookieNames = [];
+
+            foreach ($cookies as $cookie) {
+                $this->persister->storeCookie($scan, $cookie);
+
+                if (! empty($cookie['name'])) {
+                    $detectedCookieNames[] = $cookie['name'];
+                }
+
+                $stored++;
+            }
+
+            foreach ($storageItems as $storageItem) {
+                $this->persister->storeStorageItem($scan, $storageItem);
+                $stored++;
+            }
+
+            foreach ($scripts as $script) {
+                $this->persister->storeScript($scan, $script);
+                $stored++;
+            }
+
+            $detectedCookieNames = array_values(array_unique($detectedCookieNames));
+
+            $this->cookieWriter->ensureCoreCookies();
+
+            $addedToJson = $this->cookieWriter->addMissingCookies($detectedCookieNames);
+
+            $summary = [
+                'scan_id' => $scan->id,
+                'scan_uuid' => $scan->uuid,
+                'stored' => $stored,
+                'added_to_json' => $addedToJson,
+                'detected' => count($detectedCookieNames) + count($storageItems) + count($scripts),
+                'cookies_detected' => count($detectedCookieNames),
+                'storage_detected' => count($storageItems),
+                'scripts_detected' => count($scripts),
+            ];
+
+            $this->persister->complete($scan, $summary);
+
+            return $summary;
+        } catch (\Throwable $e) {
+            $this->persister->fail($scan, $e->getMessage());
+
+            throw $e;
         }
-
-        $detectedCookieNames = array_unique($detectedCookieNames);
-
-        $this->cookieWriter->ensureCoreCookies();
-
-        $addedToJson = $this->cookieWriter->addMissingCookies($detectedCookieNames);
-
-        return [
-            'stored' => $stored,
-            'added_to_json' => $addedToJson,
-            'detected' => count($detectedCookieNames),
-        ];
     }
 
     protected function scanHttpHeaders(array $urls): array
