@@ -2,8 +2,8 @@
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
-use KostantinoAbate\Complihance\Models\Consent;
 use Illuminate\Support\Str;
+use KostantinoAbate\Complihance\Models\Consent;
 
 uses(RefreshDatabase::class);
 
