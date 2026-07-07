@@ -25,8 +25,9 @@ class ConsentModeService
      *
      * Accepts both list-style category keys and associative category states.
      *
-     * @param array<int|string, bool|string> $categories
+     * @param  array<int|string, bool|string>  $categories
      * @return array<string, string>
+     *
      * @throws FileNotFoundException
      */
     public function fromCategories(array $categories): array

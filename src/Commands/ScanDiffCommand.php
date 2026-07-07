@@ -19,6 +19,7 @@ class ScanDiffCommand extends Command
 
     /**
      * Execute the console command.
+     *
      * @throws JsonException
      */
     public function handle(ScanDiffService $diffService): int
@@ -103,6 +104,7 @@ class ScanDiffCommand extends Command
 
     /**
      * Format a diff value for console output.
+     *
      * @throws JsonException
      */
     protected function formatDiffValue(mixed $value): string

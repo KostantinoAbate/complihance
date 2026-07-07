@@ -15,6 +15,7 @@ class ConsentController extends Controller
 {
     /**
      * Store consent preferences from the legacy web endpoint.
+     *
      * @throws JsonException
      */
     public function store(Request $request, StoreConsentAction $action): JsonResponse

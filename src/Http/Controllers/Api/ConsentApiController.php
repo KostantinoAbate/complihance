@@ -51,6 +51,7 @@ class ConsentApiController extends Controller
 
     /**
      * Store a new consent record.
+     *
      * @throws JsonException
      */
     public function store(
@@ -66,6 +67,7 @@ class ConsentApiController extends Controller
 
     /**
      * Update the current consent record.
+     *
      * @throws JsonException
      */
     public function update(

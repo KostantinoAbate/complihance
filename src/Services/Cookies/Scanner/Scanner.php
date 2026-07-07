@@ -18,11 +18,9 @@ class Scanner
     /**
      * Scan URLs and persist detected cookies, storage entries, and scripts.
      *
-     * @param array<int, string> $urls
-     * @param bool $httpHeaderOnly
-     * @param bool $acceptConsent
-     * @param string|null $setupScript
+     * @param  array<int, string>  $urls
      * @return array<string, mixed>
+     *
      * @throws Throwable
      * @throws FileNotFoundException
      * @throws JsonException

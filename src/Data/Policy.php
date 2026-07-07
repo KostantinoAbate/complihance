@@ -8,9 +8,9 @@ namespace KostantinoAbate\Complihance\Data;
 readonly class Policy
 {
     public function __construct(
-        public string  $key,
-        public string  $version,
-        public string  $title,
+        public string $key,
+        public string $version,
+        public string $title,
         public ?string $content = null,
         public ?string $view = null,
         public ?string $driver = null,

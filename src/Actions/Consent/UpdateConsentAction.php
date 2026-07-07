@@ -15,6 +15,7 @@ class UpdateConsentAction
 
     /**
      * Store updated consent preferences and revoke the previous consent.
+     *
      * @throws JsonException
      */
     public function execute(Request $request): StoredConsentResult

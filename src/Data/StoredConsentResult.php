@@ -13,7 +13,7 @@ readonly class StoredConsentResult
      * @param  array<string, mixed>  $payload
      */
     public function __construct(
-        public array  $payload,
+        public array $payload,
         public Cookie $consentCookie,
         public Cookie $anonymousCookie,
     ) {}

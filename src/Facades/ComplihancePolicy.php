@@ -4,6 +4,7 @@ namespace KostantinoAbate\Complihance\Facades;
 
 use Illuminate\Support\Facades\Facade;
 use KostantinoAbate\Complihance\Data\Policy;
+use KostantinoAbate\Complihance\Services\Policies\PolicyManager;
 
 /**
  * @method static Policy get(string $key)
@@ -15,7 +16,7 @@ use KostantinoAbate\Complihance\Data\Policy;
  * @method static bool hasAccepted(string $key, mixed $subject = null, ?string $source = null, ?string $anonymousId = null, ?string $sessionId = null)
  * @method static bool requiresAcceptance(string $key, mixed $subject = null, ?string $source = null, ?string $anonymousId = null, ?string $sessionId = null)
  *
- * @see \KostantinoAbate\Complihance\Services\Policies\PolicyManager
+ * @see PolicyManager
  */
 class ComplihancePolicy extends Facade
 {

@@ -16,8 +16,8 @@ class ScanPersister
     /**
      * Create a new cookie scan record and mark it as running.
      *
-     * @param array<int, string> $urls
-     * @param array<string, mixed> $options
+     * @param  array<int, string>  $urls
+     * @param  array<string, mixed>  $options
      */
     public function start(array $urls, array $options = []): CookieScan
     {
@@ -33,7 +33,7 @@ class ScanPersister
     /**
      * Store or update a detected HTTP cookie for the given scan.
      *
-     * @param array<string, mixed> $cookie
+     * @param  array<string, mixed>  $cookie
      */
     public function storeCookie(CookieScan $scan, array $cookie): CookieScanResult
     {
@@ -80,7 +80,7 @@ class ScanPersister
     /**
      * Store or update a detected browser storage item for the given scan.
      *
-     * @param array<string, mixed> $item
+     * @param  array<string, mixed>  $item
      */
     public function storeStorageItem(CookieScan $scan, array $item): CookieScanResult
     {
@@ -101,6 +101,7 @@ class ScanPersister
         $result = CookieScanResult::query()->firstOrNew([
             'identity_hash' => $identityHash,
         ]);
+
         return $result->forceFill([
             'scan_id' => $scan->id,
             'type' => $type,
@@ -122,7 +123,7 @@ class ScanPersister
     /**
      * Store or update a detected script for the given scan.
      *
-     * @param array<string, mixed> $script
+     * @param  array<string, mixed>  $script
      */
     public function storeScript(CookieScan $scan, array $script): CookieScanResult
     {
@@ -140,8 +141,9 @@ class ScanPersister
         ]));
 
         $result = CookieScanResult::query()->firstOrNew([
-            'identity_hash' => $identityHash
+            'identity_hash' => $identityHash,
         ]);
+
         return $result->forceFill([
             'scan_id' => $scan->id,
             'type' => 'script',
@@ -164,7 +166,7 @@ class ScanPersister
     /**
      * Mark the scan as completed and persist its summary.
      *
-     * @param array<string, mixed> $summary
+     * @param  array<string, mixed>  $summary
      */
     public function complete(CookieScan $scan, array $summary): void
     {

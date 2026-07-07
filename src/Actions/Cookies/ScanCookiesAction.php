@@ -14,8 +14,9 @@ class ScanCookiesAction
     /**
      * Scan one or more URLs for cookies and related browser storage entries.
      *
-     * @param array<int, string>|string $urls
+     * @param  array<int, string>|string  $urls
      * @return array<string, mixed>
+     *
      * @throws Throwable
      */
     public function execute(
