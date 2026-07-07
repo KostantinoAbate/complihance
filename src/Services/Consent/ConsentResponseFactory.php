@@ -9,6 +9,9 @@ use KostantinoAbate\Complihance\Http\Resources\ConsentResource;
 
 class ConsentResponseFactory
 {
+    /**
+     * Create a response for the current consent state.
+     */
     public function current(array $payload): JsonResponse
     {
         return response()->json(
@@ -16,6 +19,9 @@ class ConsentResponseFactory
         );
     }
 
+    /**
+     * Create a response for a stored consent and attach consent cookies.
+     */
     public function stored(StoredConsentResult $result, int $status = 200): JsonResponse
     {
         return response()
@@ -24,6 +30,9 @@ class ConsentResponseFactory
             ->withCookie($result->anonymousCookie);
     }
 
+    /**
+     * Create a response for consent revocation and forget consent cookies.
+     */
     public function revoked(): JsonResponse
     {
         return response()

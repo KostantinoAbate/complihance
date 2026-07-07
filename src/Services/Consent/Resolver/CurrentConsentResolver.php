@@ -2,11 +2,16 @@
 
 namespace KostantinoAbate\Complihance\Services\Consent\Resolver;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use JsonException;
 use KostantinoAbate\Complihance\Models\Consent;
 
 class CurrentConsentResolver
 {
+    /**
+     * Resolve the current active consent for the given request.
+     */
     public function resolve(Request $request): ?Consent
     {
         $cookieName = config(
@@ -17,7 +22,11 @@ class CurrentConsentResolver
         $cookie = $request->cookie($cookieName);
 
         if ($cookie) {
-            $decoded = json_decode($cookie, true);
+            try {
+                $decoded = json_decode($cookie, true, 512, JSON_THROW_ON_ERROR);
+            } catch (JsonException) {
+                $decoded = null;
+            }
 
             if (
                 is_array($decoded)
@@ -56,7 +65,7 @@ class CurrentConsentResolver
 
         return Consent::query()
             ->whereNull('revoked_at')
-            ->where(function ($query) use ($anonymousId, $sessionId) {
+            ->where(function (Builder $query) use ($anonymousId, $sessionId): void {
                 if ($anonymousId) {
                     $query->where('anonymous_id', $anonymousId);
                 }
@@ -71,11 +80,19 @@ class CurrentConsentResolver
             ->first();
     }
 
+    /**
+     * Resolve the current active consent from the current request.
+     */
     public function resolveFromCookie(): ?Consent
     {
         return $this->resolve(request());
     }
 
+    /**
+     * Determine whether the decoded consent cookie references an active consent.
+     *
+     * @param  array<string, mixed>  $decodedConsent
+     */
     public function hasActiveConsent(array $decodedConsent): bool
     {
         $consentUuid = $decodedConsent['consent_uuid'] ?? null;

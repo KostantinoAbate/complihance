@@ -2,6 +2,8 @@
 
 namespace KostantinoAbate\Complihance\Services\Policies;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use KostantinoAbate\Complihance\Models\ComplihancePolicyAcceptance;
 
 class PolicyAcceptanceStatusResolver
@@ -10,6 +12,9 @@ class PolicyAcceptanceStatusResolver
         protected PolicyManager $policies,
     ) {}
 
+    /**
+     * Determine whether the current policy version has already been accepted.
+     */
     public function hasAccepted(
         string $key,
         mixed $subject = null,
@@ -23,11 +28,11 @@ class PolicyAcceptanceStatusResolver
             ->where('policy_key', $policy->key)
             ->where('policy_version', $policy->version);
 
-        if ($source) {
-            $query->where('source', $source);
+        if ($source !== null) {
+            $query->where('source', PolicyAcceptanceSource::normalize($source));
         }
 
-        if ($subject) {
+        if ($subject instanceof Model) {
             return $query
                 ->where('subject_type', $subject->getMorphClass())
                 ->where('subject_id', $subject->getKey())
@@ -38,15 +43,15 @@ class PolicyAcceptanceStatusResolver
             return false;
         }
 
-        $query->where(function ($query) use ($anonymousId, $sessionId) {
+        $query->where(function (Builder $query) use ($anonymousId, $sessionId): void {
             if ($anonymousId) {
                 $query->where('anonymous_id', $anonymousId);
             }
 
             if ($sessionId) {
-                $method = $anonymousId ? 'orWhere' : 'where';
-
-                $query->{$method}('session_id', $sessionId);
+                $anonymousId
+                    ? $query->orWhere('session_id', $sessionId)
+                    : $query->where('session_id', $sessionId);
             }
         });
 

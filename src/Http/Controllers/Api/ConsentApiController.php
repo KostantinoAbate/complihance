@@ -5,6 +5,7 @@ namespace KostantinoAbate\Complihance\Http\Controllers\Api;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use JsonException;
 use KostantinoAbate\Complihance\Actions\Consent\ResolveCurrentConsentAction;
 use KostantinoAbate\Complihance\Actions\Consent\RevokeConsentAction;
 use KostantinoAbate\Complihance\Actions\Consent\StoreConsentAction;
@@ -14,20 +15,26 @@ use KostantinoAbate\Complihance\Services\Consent\ConsentResponseFactory;
 
 class ConsentApiController extends Controller
 {
+    /**
+     * Return the current consent state.
+     */
     public function show(
         Request $request,
         ConsentPayloadBuilder $builder,
         ResolveCurrentConsentAction $resolveCurrentConsent,
         ConsentResponseFactory $responseFactory,
     ): JsonResponse {
-        return $responseFactory->current(
-            $builder->build(
-                $resolveCurrentConsent->execute($request),
-                $request,
-            )
+        return $this->currentConsentResponse(
+            $request,
+            $builder,
+            $resolveCurrentConsent,
+            $responseFactory,
         );
     }
 
+    /**
+     * Return the current consent status.
+     */
     public function status(
         Request $request,
         ConsentPayloadBuilder $builder,
@@ -42,6 +49,10 @@ class ConsentApiController extends Controller
         );
     }
 
+    /**
+     * Store a new consent record.
+     * @throws JsonException
+     */
     public function store(
         Request $request,
         StoreConsentAction $storeConsent,
@@ -53,6 +64,10 @@ class ConsentApiController extends Controller
         );
     }
 
+    /**
+     * Update the current consent record.
+     * @throws JsonException
+     */
     public function update(
         Request $request,
         UpdateConsentAction $updateConsent,
@@ -63,6 +78,9 @@ class ConsentApiController extends Controller
         );
     }
 
+    /**
+     * Revoke the current consent record.
+     */
     public function revoke(
         Request $request,
         RevokeConsentAction $revokeConsent,
@@ -73,6 +91,9 @@ class ConsentApiController extends Controller
         return $responseFactory->revoked();
     }
 
+    /**
+     * Build the current consent JSON response.
+     */
     private function currentConsentResponse(
         Request $request,
         ConsentPayloadBuilder $builder,
@@ -81,8 +102,7 @@ class ConsentApiController extends Controller
     ): JsonResponse {
         return $responseFactory->current(
             $builder->build(
-                $resolveCurrentConsent->execute($request),
-                $request,
+                $resolveCurrentConsent->execute($request)
             )
         );
     }

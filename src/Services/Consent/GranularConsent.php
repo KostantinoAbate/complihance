@@ -6,11 +6,19 @@ use KostantinoAbate\Complihance\Services\Rendering\ComplihanceDataRepository;
 
 class GranularConsent
 {
+    /**
+     * Determine whether vendor-level consent is enabled.
+     */
     public static function enabled(): bool
     {
         return (bool) config('complihance.granular_consent.enabled', false);
     }
 
+    /**
+     * Return configured vendors keyed by vendor key.
+     *
+     * @return array<string, array<string, mixed>>
+     */
     public static function vendors(): array
     {
         if (! self::enabled()) {
@@ -18,8 +26,7 @@ class GranularConsent
         }
 
         return collect(
-            app(ComplihanceDataRepository::class)
-                ->vendors()
+            app(ComplihanceDataRepository::class)->vendors()
         )
             ->keyBy('key')
             ->all();

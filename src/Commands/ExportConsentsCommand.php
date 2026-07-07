@@ -5,6 +5,7 @@ namespace KostantinoAbate\Complihance\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use KostantinoAbate\Complihance\Models\Consent;
+use RuntimeException;
 
 class ExportConsentsCommand extends Command
 {
@@ -16,6 +17,9 @@ class ExportConsentsCommand extends Command
 
     protected $description = 'Export collected consents for compliance and audit purposes.';
 
+    /**
+     * Execute the console command.
+     */
     public function handle(): int
     {
         if ($this->option('format') !== 'csv') {
@@ -35,11 +39,17 @@ class ExportConsentsCommand extends Command
         $path = $this->option('path')
             ?: storage_path('app/complihance/exports/consents-'.now()->format('Y-m-d-His').'.csv');
 
-        if (! is_dir(dirname($path))) {
-            mkdir(dirname($path), 0755, true);
+        $directory = dirname($path);
+
+        if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
+            throw new RuntimeException("Unable to create export directory: $directory");
         }
 
         $handle = fopen($path, 'w');
+
+        if ($handle === false) {
+            throw new RuntimeException("Unable to open export file for writing: $path");
+        }
 
         fputcsv($handle, [
             'id',
@@ -66,7 +76,7 @@ class ExportConsentsCommand extends Command
             ->when($from, fn ($query) => $query->where('accepted_at', '>=', $from))
             ->when($to, fn ($query) => $query->where('accepted_at', '<=', $to))
             ->orderBy('id')
-            ->chunkById(500, function ($consents) use ($handle) {
+            ->chunkById(500, function ($consents) use ($handle): void {
                 foreach ($consents as $consent) {
                     fputcsv($handle, [
                         $consent->id,
@@ -83,17 +93,17 @@ class ExportConsentsCommand extends Command
                         $consent->cookie_configuration_version,
                         $consent->ip_address,
                         $consent->user_agent,
-                        optional($consent->accepted_at)->toDateTimeString(),
-                        optional($consent->revoked_at)->toDateTimeString(),
-                        optional($consent->created_at)->toDateTimeString(),
-                        optional($consent->updated_at)->toDateTimeString(),
+                        $consent->accepted_at?->toDateTimeString(),
+                        $consent->revoked_at?->toDateTimeString(),
+                        $consent->created_at?->toDateTimeString(),
+                        $consent->updated_at?->toDateTimeString(),
                     ]);
                 }
             });
 
         fclose($handle);
 
-        $this->components->info("Consents exported to: {$path}");
+        $this->components->info("Consents exported to: $path");
 
         return self::SUCCESS;
     }

@@ -4,13 +4,18 @@ namespace KostantinoAbate\Complihance\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class ResetCommand extends Command
 {
     protected $signature = 'complihance:reset {--force : Run without confirmation}';
 
-    protected $description = 'Reset Complihance data for local development';
+    protected $description = 'Reset Complihance data for local development.';
 
+    /**
+     * Execute the console command.
+     * @throws Throwable
+     */
     public function handle(): int
     {
         if (! app()->environment(['local', 'testing'])) {
@@ -19,13 +24,15 @@ class ResetCommand extends Command
             return self::FAILURE;
         }
 
-        if (! $this->option('force') && ! $this->confirm('Delete all Complihance data?', false)) {
+        if (! $this->option('force') && ! $this->confirm('Delete all Complihance data?')) {
             $this->components->warn('Operation cancelled.');
 
             return self::SUCCESS;
         }
 
-        DB::transaction(function () {
+        DB::transaction(function (): void {
+            DB::table('complihance_cookie_scan_results')->delete();
+            DB::table('complihance_cookie_scans')->delete();
             DB::table('complihance_policy_acceptances')->delete();
             DB::table('complihance_consents')->delete();
         });

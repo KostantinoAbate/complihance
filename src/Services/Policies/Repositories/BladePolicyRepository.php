@@ -8,12 +8,19 @@ use KostantinoAbate\Complihance\Services\Policies\Repositories\Contracts\PolicyR
 
 class BladePolicyRepository implements PolicyRepository
 {
+    /**
+     * Retrieve the current Blade-backed policy definition from the package configuration.
+     */
     public function current(string $key): Policy
     {
-        $config = config("complihance.policies.{$key}");
+        $config = config("complihance.policies.$key");
 
-        if (! $config) {
-            throw new InvalidArgumentException("Policy [{$key}] is not configured.");
+        if (! is_array($config)) {
+            throw new InvalidArgumentException("Policy [$key] is not configured.");
+        }
+
+        if (! isset($config['version'])) {
+            throw new InvalidArgumentException("Policy [$key] is missing a version.");
         }
 
         return new Policy(

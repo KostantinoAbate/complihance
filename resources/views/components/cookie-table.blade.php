@@ -1,6 +1,6 @@
-@if($technologiesByCategory->isNotEmpty())
+@if ($technologiesByCategory->isNotEmpty())
     <div class="space-y-8">
-        @foreach($technologiesByCategory as $categoryKey => $tchnologies)
+        @foreach ($technologiesByCategory as $categoryKey => $technologies)
             <section class="space-y-4">
                 <h2 class="text-lg font-semibold">
                     {{ $categories[$categoryKey]['label'] ?? ucfirst($categoryKey) }}
@@ -10,7 +10,7 @@
                     <table class="w-full border-collapse text-sm">
                         <thead>
                         <tr>
-                            <th class="border px-3 py-2 text-left">Cookie</th>
+                            <th class="border px-3 py-2 text-left">{{ __('Cookie') }}</th>
                             <th class="border px-3 py-2 text-left">{{ __('Vendor') }}</th>
                             <th class="border px-3 py-2 text-left">{{ __('Technology') }}</th>
                             <th class="border px-3 py-2 text-left">{{ __('Duration') }}</th>
@@ -19,10 +19,10 @@
                         </thead>
 
                         <tbody>
-                        @foreach($tchnologies as $technology)
+                        @foreach ($technologies as $technology)
                             <tr>
                                 <td class="border px-3 py-2">
-                                    {{ $technology['name'] }}
+                                    {{ $technology['name'] ?? '-' }}
                                 </td>
 
                                 <td class="border px-3 py-2">
@@ -30,7 +30,7 @@
                                 </td>
 
                                 <td class="border px-3 py-2">
-                                    {{ $technology['technology']['label'] ?? 'Cookie' }}
+                                    {{ $technology['technology']['label'] ?? __('Cookie') }}
                                 </td>
 
                                 <td class="border px-3 py-2">

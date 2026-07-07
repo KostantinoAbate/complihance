@@ -13,6 +13,5 @@ Route::prefix(config('complihance.routes.api_prefix', 'complihance/api'))
         Route::patch('/consent', [ConsentApiController::class, 'update'])->name('consent.update');
         Route::delete('/consent', [ConsentApiController::class, 'revoke'])->name('consent.revoke');
         Route::get('/consent/status', [ConsentApiController::class, 'status'])->name('consent.status');
-
         Route::get('/configuration', [ConfigurationApiController::class, 'show'])->name('configuration.show');
     });

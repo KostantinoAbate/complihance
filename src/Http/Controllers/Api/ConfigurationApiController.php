@@ -2,6 +2,7 @@
 
 namespace KostantinoAbate\Complihance\Http\Controllers\Api;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use KostantinoAbate\Complihance\Http\Resources\ConfigurationResource;
 use KostantinoAbate\Complihance\Services\Consent\GranularConsent;
@@ -9,7 +10,10 @@ use KostantinoAbate\Complihance\Services\Rendering\ComplihanceDataRepository;
 
 class ConfigurationApiController extends Controller
 {
-    public function show(ComplihanceDataRepository $data)
+    /**
+     * Return the frontend Complihance configuration.
+     */
+    public function show(ComplihanceDataRepository $data): JsonResponse
     {
         return response()->json(
             ConfigurationResource::make([

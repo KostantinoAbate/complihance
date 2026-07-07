@@ -2,50 +2,42 @@
 
 namespace KostantinoAbate\Complihance\View\Components;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\View\Component;
 use Illuminate\View\View;
 use KostantinoAbate\Complihance\Services\Consent\Resolver\CurrentConsentResolver;
 use KostantinoAbate\Complihance\Services\Rendering\ComplihanceDataRepository;
+use KostantinoAbate\Complihance\View\Components\Concerns\ResolvesConsentDisplayData;
 
 class Preferences extends Component
 {
+    use ResolvesConsentDisplayData;
+
+    /** @var array<string, string> */
     public array $texts;
 
+    /** @var array<string, array<string, mixed>> */
     public array $categories;
 
     public bool $granularConsentEnabled;
 
+    /** @var array<string, array<string, array<string, mixed>>> */
     public array $vendorsByCategory;
 
+    /** @var array<int, string> */
     public array $acceptedCategories;
 
+    /** @var array<int, string> */
     public array $acceptedVendors;
 
+    /**
+     * @throws FileNotFoundException
+     */
     public function __construct(
         protected ComplihanceDataRepository $dataRepository,
         protected CurrentConsentResolver $currentConsentResolver,
     ) {
-        $this->texts = $this->dataRepository->texts();
-
-        $this->categories = collect($this->dataRepository->categories())
-            ->keyBy('key')
-            ->all();
-
-        $this->granularConsentEnabled = (bool) config('complihance.granular_consent.enabled', false);
-
-        $this->vendorsByCategory = collect($this->dataRepository->vendors())
-            ->filter(function (array $vendor) {
-                $categoryKey = $vendor['category'] ?? null;
-
-                if (! $categoryKey) {
-                    return false;
-                }
-
-                return ! (bool) ($this->categories[$categoryKey]['required'] ?? false);
-            })
-            ->groupBy('category')
-            ->map(fn ($vendors) => $vendors->keyBy('key')->all())
-            ->all();
+        $this->resolveConsentDisplayData();
 
         $currentConsent = $this->currentConsentResolver->resolve(request());
 
@@ -58,6 +50,9 @@ class Preferences extends Component
             ->all();
     }
 
+    /**
+     * Render the cookie preferences component.
+     */
     public function render(): View
     {
         return view('complihance::components.preferences');

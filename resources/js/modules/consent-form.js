@@ -1,22 +1,109 @@
 import { updateConsentMode } from './consent-mode';
 import { refreshBlockedContent } from './blocked-content';
 
+/**
+ * @typedef {object} ConsentPayload
+ * @property {string} source
+ * @property {Array<string>} categories
+ * @property {Array<string>} [vendors]
+ */
+
+/**
+ * @typedef {object} ComplihanceTextConfig
+ * @property {{
+ *     save_consent?: string
+ * }} [errors]
+ */
+
+/**
+ * @typedef {object} ComplihanceConfig
+ * @property {ComplihanceTextConfig} [texts]
+ * @property {string} [afterRevokeRedirectUrl]
+ */
+
+/**
+ * @param {Element} element
+ * @param {string} key
+ * @returns {string|null}
+ */
+function getData(element, key) {
+    return element.getAttribute(`data-${key}`) || null;
+}
+
+/**
+ * @param {Element} element
+ * @param {string} key
+ * @param {string} value
+ * @returns {void}
+ */
+function setData(element, key, value) {
+    element.setAttribute(`data-${key}`, value);
+}
+
+/**
+ * @param {Element} element
+ * @param {string} selector
+ * @returns {HTMLInputElement[]}
+ */
+function queryInputAll(element, selector) {
+    /** @type {NodeListOf<HTMLInputElement>} */
+    const inputs = element.querySelectorAll(selector);
+
+    return Array.from(inputs);
+}
+
+/**
+ * Returns the category input associated with a vendor input.
+ *
+ * @param {HTMLFormElement|Element} form Consent form element.
+ * @param {HTMLInputElement} vendorInput Vendor checkbox input.
+ * @returns {HTMLInputElement|null}
+ */
 function getCategoryInputByVendorInput(form, vendorInput) {
+    const vendorCategory = getData(vendorInput, 'complihance-vendor-category');
+
+    if (!vendorCategory) {
+        return null;
+    }
+
     return form.querySelector(
-        `[data-complihance-category="${vendorInput.dataset.complihanceVendorCategory}"]`
+        `[data-complihance-category="${vendorCategory}"]`
     );
 }
 
+/**
+ * Returns all vendor inputs associated with a category input.
+ *
+ * @param {HTMLFormElement|Element} form Consent form element.
+ * @param {HTMLInputElement} categoryInput Category checkbox input.
+ * @returns {HTMLInputElement[]}
+ */
 function getVendorInputsByCategoryInput(form, categoryInput) {
-    return Array.from(form.querySelectorAll(
-        `[data-complihance-vendor-category="${categoryInput.dataset.complihanceCategory}"]`
-    ));
+    const category = getData(categoryInput, 'complihance-category');
+
+    if (!category) {
+        return [];
+    }
+
+    return queryInputAll(
+        form,
+        `[data-complihance-vendor-category="${category}"]`
+    );
 }
 
+/**
+ * Updates a category checkbox state based on its vendor checkboxes.
+ *
+ * @param {HTMLFormElement|Element} form Consent form element.
+ * @param {HTMLInputElement} categoryInput Category checkbox input.
+ * @returns {void}
+ */
 function syncCategoryFromVendors(form, categoryInput) {
     const vendors = getVendorInputsByCategoryInput(form, categoryInput);
 
-    if (!vendors.length) return;
+    if (!vendors.length) {
+        return;
+    }
 
     const checkedVendors = vendors.filter((vendor) => vendor.checked);
 
@@ -24,6 +111,13 @@ function syncCategoryFromVendors(form, categoryInput) {
     categoryInput.indeterminate = checkedVendors.length > 0 && checkedVendors.length < vendors.length;
 }
 
+/**
+ * Updates vendor checkbox states based on their category checkbox.
+ *
+ * @param {HTMLFormElement|Element} form Consent form element.
+ * @param {HTMLInputElement} categoryInput Category checkbox input.
+ * @returns {void}
+ */
 function syncVendorsFromCategory(form, categoryInput) {
     const vendors = getVendorInputsByCategoryInput(form, categoryInput);
 
@@ -36,15 +130,25 @@ function syncVendorsFromCategory(form, categoryInput) {
     categoryInput.indeterminate = false;
 }
 
+/**
+ * Initializes a Complihance consent form.
+ *
+ * @param {Element} container Banner or preferences container element.
+ * @returns {void}
+ */
 export function initConsentForm(container) {
-    if (container.dataset.complihanceInitialized === 'true') return;
-
-    container.dataset.complihanceInitialized = 'true';
+    if (getData(container, 'complihance-initialized') === 'true') {
+        return;
+    }
 
     const form = container.querySelector('[data-complihance-form]');
     const backdrop = document.querySelector('[data-complihance-backdrop]');
 
-    if (!form) return;
+    if (!form) {
+        return;
+    }
+
+    setData(container, 'complihance-initialized', 'true');
 
     let isSavingConsent = false;
     let pendingSave = false;
@@ -55,16 +159,19 @@ export function initConsentForm(container) {
     const isBanner = container.matches('[data-complihance-banner]');
 
     const getSelectedCategories = () => {
-        return Array.from(form.querySelectorAll('input[name="categories[]"]'))
-            .filter((input) => input.checked || input.indeterminate || input.dataset.required === 'true')
+        return queryInputAll(form, 'input[name="categories[]"]')
+            .filter((input) => input.checked || input.indeterminate || getData(input, 'required') === 'true')
             .map((input) => input.value);
     };
 
     const getSelectedVendors = () => {
-        return Array.from(form.querySelectorAll('input[name="vendors[]"]:checked'))
+        return queryInputAll(form, 'input[name="vendors[]"]:checked')
             .map((input) => input.value);
     };
 
+    /**
+     * @returns {ConsentPayload}
+     */
     const getConsentPayload = () => {
         const payload = {
             source: isPreferences ? 'preferences' : 'banner',
@@ -78,11 +185,11 @@ export function initConsentForm(container) {
         return payload;
     };
 
+    /**
+     * @param {boolean} loading
+     * @returns {void}
+     */
     const setFormLoading = (loading) => {
-        /**
-         * Nel partial preferenze evitiamo di disabilitare i checkbox:
-         * il flash spesso nasce proprio da disabled -> enabled ad ogni autosave.
-         */
         if (isPreferences) {
             container
                 .querySelector('[data-complihance-save]')
@@ -92,18 +199,24 @@ export function initConsentForm(container) {
         }
 
         form.querySelectorAll('button, input').forEach((element) => {
-            if (element.dataset.required === 'true') return;
+            if (getData(element, 'required') === 'true') {
+                return;
+            }
 
             element.disabled = loading;
         });
     };
 
+    /**
+     * @param {string} message
+     * @returns {void}
+     */
     const showFormError = (message) => {
         let error = container.querySelector('[data-complihance-error]');
 
         if (!error) {
             error = document.createElement('p');
-            error.dataset.complihanceError = 'true';
+            setData(error, 'complihance-error', 'true');
             error.className = 'complihance-error';
             form.appendChild(error);
         }
@@ -113,17 +226,27 @@ export function initConsentForm(container) {
     };
 
     const clearFormError = () => {
-        container
-            .querySelector('[data-complihance-error]')
-            ?.classList.add('complihance-hidden');
+        const error = container.querySelector('[data-complihance-error]');
+
+        if (error) {
+            error.classList.add('complihance-hidden');
+        }
     };
 
+    /**
+     * @param {HTMLInputElement} categoryInput
+     * @returns {void}
+     */
     const syncCategoryFromVendorsSafely = (categoryInput) => {
         isSyncing = true;
         syncCategoryFromVendors(form, categoryInput);
         isSyncing = false;
     };
 
+    /**
+     * @param {HTMLInputElement} categoryInput
+     * @returns {void}
+     */
     const syncVendorsFromCategorySafely = (categoryInput) => {
         isSyncing = true;
         syncVendorsFromCategory(form, categoryInput);
@@ -133,6 +256,7 @@ export function initConsentForm(container) {
     const saveConsent = async () => {
         if (isSavingConsent) {
             pendingSave = true;
+
             return;
         }
 
@@ -179,8 +303,11 @@ export function initConsentForm(container) {
                 detail: response,
             }));
         } catch (error) {
+            /** @type {ComplihanceConfig} */
+            const config = window.ComplihanceConfig || {};
+
             const errorMessage =
-                window.ComplihanceConfig?.texts?.errors?.save_consent
+                config.texts?.errors?.save_consent
                 || 'Unable to save your cookie preferences. Please try again.';
 
             const errorPayload = {
@@ -207,22 +334,24 @@ export function initConsentForm(container) {
             setFormLoading(false);
 
             if (pendingSave) {
-                saveConsent();
+                void saveConsent();
             }
         }
     };
 
     const scheduleAutoSave = () => {
-        if (!isPreferences || isSyncing) return;
+        if (!isPreferences || isSyncing) {
+            return;
+        }
 
         clearTimeout(autoSaveTimeout);
 
         autoSaveTimeout = setTimeout(() => {
-            saveConsent();
+            void saveConsent();
         }, 350);
     };
 
-    form.querySelectorAll('[data-complihance-category]').forEach((categoryInput) => {
+    queryInputAll(form, '[data-complihance-category]').forEach((categoryInput) => {
         syncCategoryFromVendorsSafely(categoryInput);
 
         categoryInput.addEventListener('change', () => {
@@ -231,7 +360,7 @@ export function initConsentForm(container) {
         });
     });
 
-    form.querySelectorAll('[data-complihance-vendor]').forEach((vendorInput) => {
+    queryInputAll(form, '[data-complihance-vendor]').forEach((vendorInput) => {
         vendorInput.addEventListener('change', () => {
             const categoryInput = getCategoryInputByVendorInput(form, vendorInput);
 
@@ -244,40 +373,43 @@ export function initConsentForm(container) {
     });
 
     container.querySelector('[data-complihance-save]')?.addEventListener('click', () => {
-        saveConsent();
+        void saveConsent();
     });
 
     container.querySelector('[data-complihance-accept-all]')?.addEventListener('click', () => {
-        form.querySelectorAll('input[name="categories[]"]').forEach((input) => {
+        queryInputAll(form, 'input[name="categories[]"]').forEach((input) => {
             input.checked = true;
             input.indeterminate = false;
         });
 
-        form.querySelectorAll('input[name="vendors[]"]').forEach((input) => {
+        queryInputAll(form, 'input[name="vendors[]"]').forEach((input) => {
             input.checked = true;
         });
 
-        saveConsent();
+        void saveConsent();
     });
 
     container.querySelector('[data-complihance-reject]')?.addEventListener('click', () => {
-        form.querySelectorAll('input[name="categories[]"]').forEach((input) => {
-            input.checked = input.dataset.required === 'true';
+        queryInputAll(form, 'input[name="categories[]"]').forEach((input) => {
+            input.checked = getData(input, 'required') === 'true';
             input.indeterminate = false;
         });
 
-        form.querySelectorAll('input[name="vendors[]"]').forEach((input) => {
+        queryInputAll(form, 'input[name="vendors[]"]').forEach((input) => {
             input.checked = false;
         });
 
-        saveConsent();
+        void saveConsent();
     });
 
     container.querySelectorAll('[data-complihance-revoke]').forEach((button) => {
         button.addEventListener('click', async () => {
             await window.Complihance.revoke();
 
-            window.location.href = window.ComplihanceConfig?.afterRevokeRedirectUrl || '/';
+            /** @type {ComplihanceConfig} */
+            const config = window.ComplihanceConfig || {};
+
+            window.location.href = config.afterRevokeRedirectUrl || '/';
         });
     });
 }

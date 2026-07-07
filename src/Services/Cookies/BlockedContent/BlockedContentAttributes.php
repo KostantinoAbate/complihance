@@ -6,6 +6,9 @@ use Illuminate\Support\HtmlString;
 
 class BlockedContentAttributes
 {
+    /**
+     * Render the HTML attributes required to block content until consent is granted.
+     */
     public function render(
         ?string $category = null,
         ?string $src = null,

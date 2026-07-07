@@ -6,28 +6,30 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    /**
+     * Create the Complihance database tables.
+     */
+    public function up(): void
     {
-        Schema::create('complihance_consents', function (Blueprint $table) {
+        Schema::create('complihance_consents', function (Blueprint $table): void {
             $table->id();
             $table->uuid('consent_uuid')->unique();
 
             $table->nullableMorphs('subject');
 
-            $table->string('session_id')->nullable()->index();
-            $table->string('anonymous_id')->nullable()->index();
+            $table->string('session_id', 100)->nullable()->index();
+            $table->string('anonymous_id', 100)->nullable()->index();
 
-            $table->string('source')->default('api');
+            $table->string('source', 100)->default('api');
 
             $table->json('accepted_categories');
             $table->json('rejected_categories')->nullable();
-
             $table->json('vendors')->nullable();
 
-            $table->string('policy_version')->nullable();
-            $table->string('cookie_configuration_version')->nullable();
+            $table->string('policy_version', 100)->nullable();
+            $table->string('cookie_configuration_version', 100)->nullable();
 
-            $table->string('ip_address', 45)->nullable();
+            $table->ipAddress('ip_address')->nullable();
             $table->text('user_agent')->nullable();
 
             $table->timestamp('accepted_at')->nullable()->index();
@@ -36,21 +38,24 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('complihance_policies', function (Blueprint $table) {
+        Schema::create('complihance_policies', function (Blueprint $table): void {
             $table->id();
-            $table->string('key')->index(); // privacy, cookie
-            $table->string('version')->index();
+
+            $table->string('key', 100)->index();
+            $table->string('version', 100)->index();
             $table->string('title');
             $table->longText('content')->nullable();
             $table->string('view')->nullable();
+
             $table->boolean('is_active')->default(false)->index();
             $table->timestamp('published_at')->nullable()->index();
+
             $table->timestamps();
 
             $table->unique(['key', 'version']);
         });
 
-        Schema::create('complihance_policy_acceptances', function (Blueprint $table) {
+        Schema::create('complihance_policy_acceptances', function (Blueprint $table): void {
             $table->id();
             $table->string('identity_hash', 64)->unique();
 
@@ -68,7 +73,6 @@ return new class extends Migration
 
             $table->string('policy_key', 100)->index();
             $table->string('policy_version', 100)->index();
-
             $table->string('source', 100)->nullable()->index();
 
             $table->json('metadata')->nullable();
@@ -81,14 +85,14 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('complihance_cookie_scans', function (Blueprint $table) {
+        Schema::create('complihance_cookie_scans', function (Blueprint $table): void {
             $table->id();
             $table->uuid('uuid')->unique();
 
             $table->json('urls');
             $table->json('options')->nullable();
 
-            $table->string('status')->default('running')->index(); // running, completed, failed
+            $table->string('status', 50)->default('running')->index();
             $table->json('summary')->nullable();
 
             $table->timestamp('started_at')->nullable()->index();
@@ -97,7 +101,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('complihance_cookie_scan_results', function (Blueprint $table) {
+        Schema::create('complihance_cookie_scan_results', function (Blueprint $table): void {
             $table->id();
 
             $table->foreignId('scan_id')
@@ -107,7 +111,7 @@ return new class extends Migration
 
             $table->string('identity_hash', 64)->unique();
 
-            $table->string('type')->default('cookie')->index(); // cookie, local_storage, session_storage, script
+            $table->string('type', 50)->default('cookie')->index();
             $table->string('key')->nullable()->index();
             $table->text('value_preview')->nullable();
 
@@ -117,11 +121,11 @@ return new class extends Migration
             $table->string('url')->nullable();
 
             $table->string('vendor')->nullable();
-            $table->string('category')->nullable();
+            $table->string('category', 100)->nullable();
 
             $table->boolean('secure')->default(false);
             $table->boolean('http_only')->default(false);
-            $table->string('same_site')->nullable();
+            $table->string('same_site', 50)->nullable();
             $table->timestamp('expires_at')->nullable();
 
             $table->json('metadata')->nullable();
@@ -132,6 +136,9 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Drop the Complihance database tables.
+     */
     public function down(): void
     {
         Schema::dropIfExists('complihance_cookie_scan_results');

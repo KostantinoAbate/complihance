@@ -16,8 +16,11 @@ class RetentionCommand extends Command
         {--chunk= : Override configured chunk size}
         {--force : Required when using delete action}';
 
-    protected $description = 'Apply Complihance retention rules';
+    protected $description = 'Apply Complihance retention rules.';
 
+    /**
+     * Execute the console command.
+     */
     public function handle(): int
     {
         if (! config('complihance.retention.enabled', true)) {
@@ -32,13 +35,13 @@ class RetentionCommand extends Command
         $dryRun = (bool) $this->option('dry-run');
 
         if (! in_array($action, ['anonymize', 'delete'], true)) {
-            $this->components->error("Invalid retention action [{$action}]. Supported: anonymize, delete.");
+            $this->components->error("Invalid retention action [$action]. Supported: anonymize, delete.");
 
             return self::FAILURE;
         }
 
         if ($only !== null && ! in_array($only, ['consents', 'policy-acceptances'], true)) {
-            $this->components->error("Invalid resource [{$only}]. Supported: consents, policy-acceptances.");
+            $this->components->error("Invalid resource [$only]. Supported: consents, policy-acceptances.");
 
             return self::FAILURE;
         }
@@ -82,14 +85,17 @@ class RetentionCommand extends Command
         }
 
         $this->components->info('Retention completed.');
-        $this->line("Action: {$action}");
+        $this->line("Action: $action");
         $this->line('Dry run: '.($dryRun ? 'yes' : 'no'));
-        $this->line("Expired consents processed: {$processedConsents}");
-        $this->line("Expired policy acceptances processed: {$processedPolicyAcceptances}");
+        $this->line("Expired consents processed: $processedConsents");
+        $this->line("Expired policy acceptances processed: $processedPolicyAcceptances");
 
         return self::SUCCESS;
     }
 
+    /**
+     * Process expired records using the selected retention action.
+     */
     protected function processExpired(Builder $query, string $action, int $chunkSize, bool $dryRun): int
     {
         if ($dryRun) {
@@ -98,13 +104,11 @@ class RetentionCommand extends Command
 
         $processed = 0;
 
-        $query->chunkById($chunkSize, function ($records) use ($action, &$processed) {
+        $query->chunkById($chunkSize, function ($records) use ($action, &$processed): void {
             foreach ($records as $record) {
                 if ($action === 'delete') {
                     $record->delete();
-                }
-
-                if ($action === 'anonymize') {
+                } elseif ($action === 'anonymize') {
                     $record->anonymizeForRetention();
                 }
 

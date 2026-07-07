@@ -2,6 +2,10 @@
 
 namespace KostantinoAbate\Complihance\Services\Cookies\Scanner;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
+use JsonException;
+use Throwable;
+
 class Scanner
 {
     public function __construct(
@@ -11,6 +15,18 @@ class Scanner
         protected ScanPersister $persister,
     ) {}
 
+    /**
+     * Scan URLs and persist detected cookies, storage entries, and scripts.
+     *
+     * @param array<int, string> $urls
+     * @param bool $httpHeaderOnly
+     * @param bool $acceptConsent
+     * @param string|null $setupScript
+     * @return array<string, mixed>
+     * @throws Throwable
+     * @throws FileNotFoundException
+     * @throws JsonException
+     */
     public function scan(
         array $urls,
         bool $httpHeaderOnly = false,
@@ -72,8 +88,8 @@ class Scanner
             $addedToTechnologiesJson = $this->technologyWriter->addMissingTechnologies($technologyItems);
 
             $summary = [
-                'scan_id' => $scan->id,
-                'scan_uuid' => $scan->uuid,
+                'scan_id' => $scan->getKey(),
+                'scan_uuid' => $scan->getAttribute('uuid'),
                 'stored' => $stored,
                 'added_to_technologies_json' => $addedToTechnologiesJson,
                 'detected' => count($detectedCookieNames) + count($storageItems) + count($scripts),
@@ -85,19 +101,25 @@ class Scanner
             $this->persister->complete($scan, $summary);
 
             return $summary;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->persister->fail($scan, $e->getMessage());
 
             throw $e;
         }
     }
 
+    /**
+     * Scan only Set-Cookie headers without executing JavaScript.
+     *
+     * @param  array<int, string>  $urls
+     * @return array<int, array<string, mixed>>
+     */
     protected function scanHttpHeaders(array $urls): array
     {
         $cookies = [];
 
         foreach ($urls as $url) {
-            $headers = get_headers($url, true);
+            $headers = @get_headers($url, true);
 
             if (! $headers || ! isset($headers['Set-Cookie'])) {
                 continue;

@@ -6,6 +6,9 @@
 <div
     data-complihance-banner
     class="complihance-banner"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="complihance-banner-title"
 >
     <button
         type="button"
@@ -24,7 +27,10 @@
         @endif
 
         @if (! empty($texts['title']))
-            <h2 class="complihance-title">
+            <h2
+                id="complihance-banner-title"
+                class="complihance-title"
+            >
                 {{ $texts['title'] }}
             </h2>
         @endif
@@ -40,7 +46,7 @@
                 <a
                     href="{{ config('complihance.cookie_policy_url') }}"
                     target="_blank"
-                    rel="noopener"
+                    rel="noopener noreferrer"
                 >
                     {{ $texts['cookie_policy_label'] }}
                 </a>
@@ -56,7 +62,8 @@
                 @php
                     $required = (bool) ($category['required'] ?? false);
                     $vendors = $vendorsByCategory[$key] ?? [];
-                    $categoryInputId = 'cookie-category-' . $loop->iteration;
+                    $categoryInputId = 'complihance-banner-category-' . $loop->iteration;
+                    $categoryPanelId = 'complihance-banner-category-panel-' . $loop->iteration;
                 @endphp
 
                 <div
@@ -68,6 +75,7 @@
                         class="complihance-accordion__trigger complihance-row complihance-row--center"
                         data-complihance-accordion-trigger
                         aria-expanded="{{ $loop->first ? 'true' : 'false' }}"
+                        aria-controls="{{ $categoryPanelId }}"
                     >
                         <input
                             class="complihance-checkbox"
@@ -93,12 +101,14 @@
                         <span
                             class="complihance-accordion__icon"
                             data-complihance-accordion-icon
+                            aria-hidden="true"
                         >
                             {{ $loop->first ? '−' : '+' }}
                         </span>
                     </button>
 
                     <div
+                        id="{{ $categoryPanelId }}"
                         data-complihance-accordion-panel
                         class="complihance-accordion__panel {{ $loop->first ? 'complihance-accordion__panel--open' : '' }}"
                     >

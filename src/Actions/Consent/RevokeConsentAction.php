@@ -10,6 +10,9 @@ class RevokeConsentAction
         protected ResolveCurrentConsentAction $resolveCurrentConsent,
     ) {}
 
+    /**
+     * Revoke the current consent associated with the given request.
+     */
     public function execute(Request $request): void
     {
         $this->resolveCurrentConsent

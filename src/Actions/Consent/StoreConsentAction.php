@@ -4,6 +4,8 @@ namespace KostantinoAbate\Complihance\Actions\Consent;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Validation\Rule;
+use JsonException;
 use KostantinoAbate\Complihance\Data\StoredConsentResult;
 use KostantinoAbate\Complihance\Services\Consent\ConsentRecorder;
 use KostantinoAbate\Complihance\Services\Consent\ConsentSource;
@@ -25,17 +27,21 @@ class StoreConsentAction
         protected PolicyAcceptanceRecorder $policyAcceptanceRecorder,
     ) {}
 
+    /**
+     * Validate, store, and serialize a consent preference payload.
+     * @throws JsonException
+     */
     public function execute(Request $request): StoredConsentResult
     {
         $configuredCategories = collect($this->data->rawCategories())
-            ->filter(fn ($category) => ($category['enabled'] ?? true))
+            ->filter(fn (array $category): bool => $category['enabled'] ?? true)
             ->all();
 
         $categoryKeys = array_keys($configuredCategories);
 
         $data = $request->validate([
             'categories' => ['required', 'array'],
-            'categories.*' => ['string', 'in:'.implode(',', $categoryKeys)],
+            'categories.*' => ['string', Rule::in($categoryKeys)],
             'vendors' => ['sometimes', 'array'],
             'vendors.*' => ['string'],
             'source' => ['sometimes', 'nullable', 'string'],
@@ -114,26 +120,24 @@ class StoreConsentAction
             $payload['vendors'] = $acceptedVendors;
         }
 
+        $cookieLifetime = config('complihance.cookie_lifetime', 60 * 24 * 365);
+
         return new StoredConsentResult(
             payload: $payload,
             consentCookie: Cookie::make(
                 name: config('complihance.cookie_name', 'complihance_consent'),
-                value: json_encode($payload),
-                minutes: config('complihance.cookie_lifetime', 60 * 24 * 180),
+                value: json_encode($payload, JSON_THROW_ON_ERROR),
+                minutes: $cookieLifetime,
                 path: '/',
                 secure: $context->isSecure,
-                httpOnly: true,
-                raw: false,
                 sameSite: 'Lax',
             ),
             anonymousCookie: Cookie::make(
                 name: config('complihance.anonymous_cookie_name', 'complihance_anonymous_id'),
                 value: $context->anonymousId,
-                minutes: config('complihance.cookie_lifetime', 60 * 24 * 180),
+                minutes: $cookieLifetime,
                 path: '/',
                 secure: $context->isSecure,
-                httpOnly: true,
-                raw: false,
                 sameSite: 'Lax',
             ),
         );

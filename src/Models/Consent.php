@@ -2,11 +2,30 @@
 
 namespace KostantinoAbate\Complihance\Models;
 
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $consent_uuid
+ * @property string|null $subject_type
+ * @property int|string|null $subject_id
+ * @property string|null $session_id
+ * @property string|null $anonymous_id
+ * @property string|null $source
+ * @property array|null $accepted_categories
+ * @property array|null $rejected_categories
+ * @property array|null $vendors
+ * @property string|null $policy_version
+ * @property string|null $cookie_configuration_version
+ * @property string|null $ip_address
+ * @property string|null $user_agent
+ * @property Carbon|null $accepted_at
+ * @property Carbon|null $revoked_at
+ */
 class Consent extends Model
 {
     use HasUuids;
@@ -39,16 +58,27 @@ class Consent extends Model
         'revoked_at' => 'datetime',
     ];
 
+    /**
+     * Get the columns that should receive a unique identifier.
+     *
+     * @return array<int, string>
+     */
     public function uniqueIds(): array
     {
         return ['consent_uuid'];
     }
 
+    /**
+     * Get the subject associated with this consent.
+     */
     public function subject(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /**
+     * Calculate when this consent expires according to retention settings.
+     */
     public function expiresAt(): ?Carbon
     {
         if (! $this->accepted_at) {
@@ -60,6 +90,11 @@ class Consent extends Model
         );
     }
 
+    /**
+     * Determine whether this consent is expired.
+     *
+     * @noinspection PhpUnused
+     */
     public function isExpired(): bool
     {
         $expiresAt = $this->expiresAt();
@@ -67,15 +102,21 @@ class Consent extends Model
         return $expiresAt !== null && now()->greaterThanOrEqualTo($expiresAt);
     }
 
-    public function scopeExpired($query)
+    /**
+     * Scope consents that are eligible for retention processing.
+     *
+     * @noinspection PhpUnused
+     */
+    public function scopeExpired(Builder $query): Builder
     {
         $months = config('complihance.retention.consent_retention_months', 12);
 
         return $query
             ->whereNotNull('accepted_at')
             ->where('accepted_at', '<=', now()->subMonths($months))
-            ->where(function ($q) {
-                $q->whereNotNull('subject_id')
+            ->where(function (Builder $query): void {
+                $query
+                    ->whereNotNull('subject_id')
                     ->orWhereNotNull('session_id')
                     ->orWhereNotNull('anonymous_id')
                     ->orWhereNotNull('ip_address')
@@ -83,6 +124,11 @@ class Consent extends Model
             });
     }
 
+    /**
+     * Remove personally identifiable data while keeping audit metadata.
+     *
+     * @noinspection PhpUnused
+     */
     public function anonymizeForRetention(): bool
     {
         return $this->forceFill([
@@ -95,9 +141,15 @@ class Consent extends Model
         ])->save();
     }
 
+    /**
+     * Determine whether personally identifiable data has already been removed.
+     *
+     * @noinspection PhpUnused
+     */
     public function isAnonymized(): bool
     {
-        return $this->subject_id === null
+        return $this->subject_type === null
+            && $this->subject_id === null
             && $this->session_id === null
             && $this->anonymous_id === null
             && $this->ip_address === null

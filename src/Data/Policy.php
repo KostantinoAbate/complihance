@@ -2,19 +2,27 @@
 
 namespace KostantinoAbate\Complihance\Data;
 
-class Policy
+/**
+ * Immutable policy definition resolved from package configuration.
+ */
+readonly class Policy
 {
     public function __construct(
-        public readonly string $key,
-        public readonly string $version,
-        public readonly string $title,
-        public readonly ?string $content = null,
-        public readonly ?string $view = null,
-        public readonly ?string $driver = null,
+        public string  $key,
+        public string  $version,
+        public string  $title,
+        public ?string $content = null,
+        public ?string $view = null,
+        public ?string $driver = null,
     ) {}
 
+    /**
+     * Determine whether the policy should be rendered from a Blade view.
+     *
+     * @noinspection PhpUnused
+     */
     public function isBlade(): bool
     {
-        return filled($this->view);
+        return $this->driver === 'blade' || filled($this->view);
     }
 }

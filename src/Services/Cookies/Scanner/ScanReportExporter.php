@@ -2,16 +2,24 @@
 
 namespace KostantinoAbate\Complihance\Services\Cookies\Scanner;
 
-use Illuminate\Support\Facades\File;
+use Illuminate\Database\Eloquent\Collection;
+use JsonException;
 use KostantinoAbate\Complihance\Models\CookieScan;
+use KostantinoAbate\Complihance\Models\CookieScanResult;
+use RuntimeException;
 
 class ScanReportExporter
 {
+    /**
+     * Export the given scan and its results to a JSON file.
+     *
+     * @throws JsonException
+     */
     public function exportJson(CookieScan $scan, string $path): string
     {
-        File::ensureDirectoryExists(dirname($path));
+        $this->ensureDirectoryExists($path);
 
-        File::put(
+        file_put_contents(
             $path,
             json_encode([
                 'scan' => [
@@ -25,17 +33,26 @@ class ScanReportExporter
                     'finished_at' => $scan->finished_at?->toISOString(),
                 ],
                 'results' => $scan->results()->get()->toArray(),
-            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
         );
 
         return $path;
     }
 
+    /**
+     * Export the given scan results to a CSV file.
+     *
+     * @throws JsonException
+     */
     public function exportCsv(CookieScan $scan, string $path): string
     {
-        File::ensureDirectoryExists(dirname($path));
+        $this->ensureDirectoryExists($path);
 
-        $handle = fopen($path, 'w');
+        $handle = fopen($path, 'wb');
+
+        if ($handle === false) {
+            throw new RuntimeException("Unable to open scan report file for writing: $path");
+        }
 
         fputcsv($handle, [
             'type',
@@ -53,7 +70,10 @@ class ScanReportExporter
             'metadata',
         ]);
 
-        foreach ($scan->results as $result) {
+        /** @var Collection<int, CookieScanResult> $results */
+        $results = $scan->results()->get();
+
+        foreach ($results as $result) {
             fputcsv($handle, [
                 $result->type,
                 $result->key,
@@ -63,12 +83,12 @@ class ScanReportExporter
                 $result->url,
                 $result->vendor,
                 $result->category,
-                $result->secure,
-                $result->http_only,
+                (int) $result->secure,
+                (int) $result->http_only,
                 $result->same_site,
                 $result->expires_at,
                 $result->metadata
-                    ? json_encode($result->metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                    ? json_encode($result->metadata, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR)
                     : null,
             ]);
         }
@@ -76,5 +96,17 @@ class ScanReportExporter
         fclose($handle);
 
         return $path;
+    }
+
+    /**
+     * Ensure that the target report directory exists.
+     */
+    protected function ensureDirectoryExists(string $path): void
+    {
+        $directory = dirname($path);
+
+        if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
+            throw new RuntimeException("Unable to create scan report directory: $directory");
+        }
     }
 }

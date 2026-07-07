@@ -17,7 +17,7 @@ return [
     | Consent Cookie Lifetime
     |--------------------------------------------------------------------------
     |
-    | Lifetime of the consent cookie expressed in minutes.
+    | Lifetime of the consent cookie, expressed in minutes.
     | Default: 12 months.
     |
     */
@@ -28,17 +28,17 @@ return [
     | Cookie Policy URL
     |--------------------------------------------------------------------------
     |
-    | Set cookie policy URL to link it in the consent banner.
+    | URL used to link the cookie policy from the consent banner.
     |
     */
-    'cookie_policy_url' => '/cookie-policy',
+    'cookie_policy_url' => env('COMPLIHANCE_COOKIE_POLICY_URL', '/cookie-policy'),
 
     /*
     |--------------------------------------------------------------------------
     | Package Routes
     |--------------------------------------------------------------------------
     |
-    | Configure web and API routes exposed by Complihance.
+    | Configure the web and API routes exposed by Complihance.
     |
     */
     'routes' => [
@@ -63,10 +63,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Data sources & localization
+    | Data Sources and Localization
     |--------------------------------------------------------------------------
     |
-    | Define where to find categories & cookies source
+    | Define where categories, technologies, and localized texts are stored.
     |
     */
     'data' => [
@@ -175,9 +175,8 @@ return [
     | Policy Definitions
     |--------------------------------------------------------------------------
     |
-    | Configure the policies managed by Complihance.
-    | Each policy has its own version and can require a renewed acceptance
-    | when the configured version changes.
+    | Configure the policies managed by Complihance. Each policy has its own
+    | version and can require renewed acceptance when that version changes.
     |
     */
     'policies' => [
@@ -223,7 +222,7 @@ return [
     'retention' => [
         'enabled' => env('COMPLIHANCE_RETENTION_ENABLED', true),
         'consent_retention_months' => env('COMPLIHANCE_CONSENT_RETENTION_MONTHS', 12),
-        'expired_action' => env('COMPLIHANCE_EXPIRED_CONSENTS_ACTION', 'anonymize'), // Supported values: anonymize, delete
+        'expired_action' => env('COMPLIHANCE_EXPIRED_CONSENTS_ACTION', 'anonymize'), // Supported values: anonymize, delete.
         'chunk_size' => env('COMPLIHANCE_RETENTION_CHUNK_SIZE', 100),
     ],
 
@@ -232,8 +231,8 @@ return [
     | Blocked Content
     |--------------------------------------------------------------------------
     |
-    | Configure placeholders and inline consent requests for blocked
-    | embedded content.
+    | Configure placeholders and inline consent requests for blocked embedded
+    | content.
     |
     */
     'blocked_content' => [
@@ -256,21 +255,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | After Revoke redirect
+    | After Revoke Redirect
     |--------------------------------------------------------------------------
     |
-    | Choose where to redirect after consent revoke.
+    | URL where users are redirected after consent revocation.
     |
     */
-    'after_revoke_redirect_url' => '/',
+    'after_revoke_redirect_url' => env('COMPLIHANCE_AFTER_REVOKE_REDIRECT_URL', '/'),
 
     /*
     |--------------------------------------------------------------------------
-    | Content Security Policy (CSP)
+    | Content Security Policy
     |--------------------------------------------------------------------------
     |
-    | Complihance supports CSP nonces for the inline scripts required to
-    | expose the frontend configuration and initialize Google Consent Mode.
+    | Complihance supports CSP nonces for the inline scripts required to expose
+    | the frontend configuration and initialize Google Consent Mode.
     |
     | You may provide a static nonce value:
     |
@@ -280,8 +279,8 @@ return [
     |
     |     'csp_nonce_resolver' => fn () => csp_nonce(),
     |
-    | If both options are null, Complihance will render the inline scripts
-    | without a nonce attribute.
+    | If both options are null, Complihance will render inline scripts without
+    | a nonce attribute.
     |
     */
     'csp_nonce' => null,
@@ -293,8 +292,7 @@ return [
     | Scanner
     |--------------------------------------------------------------------------
     |
-    | Configure Complihance Cookie Scanner
-    | - sitemap_limit:
+    | Configure the Complihance cookie scanner.
     |
     */
     'scanner' => [

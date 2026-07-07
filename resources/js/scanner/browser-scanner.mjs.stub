@@ -1,0 +1,287 @@
+// noinspection NpmUsedModulesInstalled
+import { chromium } from 'playwright';
+
+/**
+ * @typedef {import('playwright').Browser} Browser
+ * @typedef {import('playwright').BrowserContext} BrowserContext
+ * @typedef {import('playwright').Page} Page
+ * @typedef {import('playwright').Cookie} PlaywrightCookie
+ */
+
+/**
+ * @typedef {object} NormalizedCookie
+ * @property {string} name
+ * @property {string|null} domain
+ * @property {string} path
+ * @property {string} url
+ * @property {boolean} secure
+ * @property {boolean} http_only
+ * @property {string|null} same_site
+ * @property {string|null} expires_at
+ */
+
+/**
+ * @typedef {object} StorageItem
+ * @property {string} type
+ * @property {string} key
+ * @property {string} value
+ */
+
+/**
+ * @typedef {object} NormalizedStorageItem
+ * @property {string} type
+ * @property {string} key
+ * @property {string} value_preview
+ * @property {string} url
+ */
+
+/**
+ * @typedef {object} NormalizedScript
+ * @property {string} type
+ * @property {string} src
+ * @property {string} url
+ */
+
+/** @type {string[]} */
+const urls = JSON.parse(__URLS_JSON__);
+
+/** @type {boolean} */
+const acceptConsent = JSON.parse(__ACCEPT_CONSENT_JSON__);
+
+/** @type {string|null} */
+const setupScriptPath = JSON.parse(__SETUP_SCRIPT_PATH_JSON__);
+
+const browser = await chromium.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+});
+
+const context = await browser.newContext();
+const page = await context.newPage();
+
+if (setupScriptPath) {
+    try {
+        const setupModule = await import(setupScriptPath);
+        const setup = setupModule.default || setupModule.setup;
+
+        if (typeof setup !== 'function') {
+            console.error('Setup script must export a default function or a named setup function.');
+            process.exit(3);
+        }
+
+        await setup({ page, context, browser });
+    } catch (error) {
+        console.error('Failed to execute setup script.');
+        console.error(error instanceof Error ? error.message : String(error));
+        process.exit(3);
+    }
+}
+
+/** @type {Map<string, NormalizedCookie>} */
+const scannedCookies = new Map();
+
+/** @type {Map<string, NormalizedStorageItem>} */
+const scannedStorageItems = new Map();
+
+/** @type {Map<string, NormalizedScript>} */
+const scannedScripts = new Map();
+
+/**
+ * @param {PlaywrightCookie} cookie
+ * @returns {string}
+ */
+function cookieKey(cookie) {
+    return `${cookie.name}|${cookie.domain || ''}|${cookie.path || '/'}`;
+}
+
+/**
+ * @param {NormalizedStorageItem} item
+ * @returns {string}
+ */
+function storageKey(item) {
+    return `${item.type}|${item.key}|${item.url}`;
+}
+
+/**
+ * @param {NormalizedScript} script
+ * @returns {string}
+ */
+function scriptKey(script) {
+    return `${script.src}|${script.url}`;
+}
+
+/**
+ * @param {PlaywrightCookie} cookie
+ * @param {string} url
+ * @returns {NormalizedCookie}
+ */
+function normalizeCookie(cookie, url) {
+    return {
+        name: cookie.name,
+        domain: cookie.domain || null,
+        path: cookie.path || '/',
+        url,
+        secure: Boolean(cookie.secure),
+        http_only: Boolean(cookie.httpOnly),
+        same_site: cookie.sameSite || null,
+        expires_at: cookie.expires && cookie.expires > 0
+            ? new Date(cookie.expires * 1000).toISOString()
+            : null,
+    };
+}
+
+/**
+ * @param {string} type
+ * @param {string} key
+ * @param {string} value
+ * @param {string} url
+ * @returns {NormalizedStorageItem}
+ */
+function normalizeStorageItem(type, key, value, url) {
+    return {
+        type,
+        key,
+        value_preview: String(value).slice(0, 200),
+        url,
+    };
+}
+
+/**
+ * @param {string} src
+ * @param {string} url
+ * @returns {NormalizedScript}
+ */
+function normalizeScript(src, url) {
+    return {
+        type: 'script',
+        src,
+        url,
+    };
+}
+
+/**
+ * @param {Page} page
+ * @param {string} url
+ * @returns {Promise<void>}
+ */
+async function collectStorage(page, url) {
+    /** @type {StorageItem[]} */
+    const storageItems = await page.evaluate(() => {
+        const localStorageItems = Object.entries(window.localStorage).map(([key, value]) => ({
+            type: 'local_storage',
+            key,
+            value,
+        }));
+
+        const sessionStorageItems = Object.entries(window.sessionStorage).map(([key, value]) => ({
+            type: 'session_storage',
+            key,
+            value,
+        }));
+
+        return [...localStorageItems, ...sessionStorageItems];
+    });
+
+    storageItems.forEach((item) => {
+        const normalized = normalizeStorageItem(item.type, item.key, item.value, url);
+        const key = storageKey(normalized);
+
+        if (!scannedStorageItems.has(key)) {
+            scannedStorageItems.set(key, normalized);
+        }
+    });
+}
+
+/**
+ * @param {Page} page
+ * @param {string} url
+ * @returns {Promise<void>}
+ */
+async function collectScripts(page, url) {
+    /** @type {string[]} */
+    const scripts = await page.evaluate(() => {
+        return Array.from(document.scripts)
+            .map((script) => script.src)
+            .filter(Boolean);
+    });
+
+    scripts.forEach((src) => {
+        const normalized = normalizeScript(src, url);
+        const key = scriptKey(normalized);
+
+        if (!scannedScripts.has(key)) {
+            scannedScripts.set(key, normalized);
+        }
+    });
+}
+
+/**
+ * @param {Page} page
+ * @returns {Promise<boolean>}
+ */
+async function acceptComplihanceConsent(page) {
+    const selectors = [
+        '[data-complihance-accept-all]',
+        '[data-complihance-action="accept-all"]',
+        'button[name="complihance_accept_all"]',
+        '#complihance-accept-all',
+    ];
+
+    for (const selector of selectors) {
+        const element = page.locator(selector).first();
+
+        if (await element.count() > 0) {
+            try {
+                await element.click({ timeout: 3000 });
+                await page.waitForTimeout(1500);
+
+                return true;
+            } catch {
+                // Try the next selector.
+            }
+        }
+    }
+
+    return false;
+}
+
+for (const url of urls) {
+    try {
+        await page.goto(url, {
+            waitUntil: 'networkidle',
+            timeout: 30000,
+        });
+    } catch (error) {
+        console.error('Failed to scan URL: ' + url);
+        console.error(error instanceof Error ? error.message : String(error));
+        process.exit(2);
+    }
+
+    await page.waitForTimeout(1000);
+
+    if (acceptConsent) {
+        await acceptComplihanceConsent(page);
+        await page.waitForTimeout(2000);
+    }
+
+    const cookies = await context.cookies();
+
+    cookies.forEach((cookie) => {
+        const key = cookieKey(cookie);
+
+        if (!scannedCookies.has(key)) {
+            scannedCookies.set(key, normalizeCookie(cookie, url));
+        }
+    });
+
+    await collectStorage(page, url);
+    await collectScripts(page, url);
+}
+
+await browser.close();
+
+console.log(JSON.stringify({
+    cookies: Array.from(scannedCookies.values()),
+    storage: Array.from(scannedStorageItems.values()),
+    scripts: Array.from(scannedScripts.values()),
+}));

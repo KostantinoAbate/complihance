@@ -12,6 +12,9 @@ class ConsentRequestContextResolver
         protected SubjectResolver $subjectResolver,
     ) {}
 
+    /**
+     * Resolve the consent request context from the current HTTP request.
+     */
     public function resolve(Request $request): ConsentRequestContext
     {
         $subject = $this->subjectResolver->resolve();

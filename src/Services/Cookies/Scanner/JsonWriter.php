@@ -3,6 +3,7 @@
 namespace KostantinoAbate\Complihance\Services\Cookies\Scanner;
 
 use Illuminate\Support\Facades\File;
+use JsonException;
 use KostantinoAbate\Complihance\Services\Cookies\Scanner\Patterns\TechnologyMatcher;
 use KostantinoAbate\Complihance\Services\Rendering\ComplihanceDataRepository;
 
@@ -13,6 +14,12 @@ class JsonWriter
         protected ComplihanceDataRepository $repository,
     ) {}
 
+    /**
+     * Add missing technology definitions for scanned items.
+     *
+     * @param array<int, array<string, mixed>> $items
+     * @throws JsonException
+     */
     public function addMissingTechnologies(array $items): int
     {
         $path = $this->repository->technologiesPath();
@@ -48,6 +55,10 @@ class JsonWriter
         return $added;
     }
 
+    /**
+     * Ensure Complihance core technology definitions exist.
+     * @throws JsonException
+     */
     public function ensureCoreTechnologies(): int
     {
         return $this->addMissingTechnologyDefinitions([
@@ -88,7 +99,7 @@ class JsonWriter
                         'duration' => '12 months',
                     ],
                     'it' => [
-                        'name' => 'Identificativo anonimo visitatore',
+                        'name' => 'Identificativo visitatore anonimo',
                         'description' => 'Memorizza un identificativo anonimo usato per associare i consensi ai visitatori anonimi.',
                         'duration' => '12 mesi',
                     ],
@@ -97,6 +108,12 @@ class JsonWriter
         ]);
     }
 
+    /**
+     * Add missing technology definitions by key.
+     *
+     * @param array<string, array<string, mixed>> $definitions
+     * @throws JsonException
+     */
     public function addMissingTechnologyDefinitions(array $definitions): int
     {
         $path = $this->repository->technologiesPath();
@@ -127,6 +144,12 @@ class JsonWriter
         return $added;
     }
 
+    /**
+     * Build a technology definition from a known matcher pattern.
+     *
+     * @param  array<string, mixed>  $item
+     * @return array<string, mixed>|null
+     */
     protected function matcherDefinition(array $item): ?array
     {
         $type = $item['type'] ?? 'cookie';
@@ -147,6 +170,12 @@ class JsonWriter
         return $this->normalizeDefinition($match, $value);
     }
 
+    /**
+     * Build a fallback technology definition for an unknown item.
+     *
+     * @param  array<string, mixed>  $item
+     * @return array<string, mixed>
+     */
     protected function fallbackTechnologyDefinition(array $item): array
     {
         $type = $item['type'] ?? 'cookie';
@@ -166,16 +195,25 @@ class JsonWriter
         ];
     }
 
+    /**
+     * Resolve the unique definition key for a scanned item.
+     *
+     * @param  array<string, mixed>  $item
+     */
     protected function definitionKey(array $item): ?string
     {
         return match ($item['type'] ?? 'cookie') {
             'cookie' => $item['name'] ?? $item['key'] ?? null,
-            'local_storage', 'session_storage' => $item['key'] ?? null,
             'script' => $item['src'] ?? $item['key'] ?? null,
             default => $item['key'] ?? null,
         };
     }
 
+    /**
+     * Build technology metadata for a storage type.
+     *
+     * @return array{type: string, label: string}
+     */
     protected function technology(string $type): array
     {
         return [
@@ -190,6 +228,11 @@ class JsonWriter
         ];
     }
 
+    /**
+     * Build an exact-match regex pattern for a scanned item.
+     *
+     * @param  array<string, mixed>  $item
+     */
     protected function patternFor(array $item): string
     {
         $value = $this->definitionKey($item) ?? '';
@@ -197,6 +240,11 @@ class JsonWriter
         return '^'.preg_quote($value, '/').'$';
     }
 
+    /**
+     * Resolve a readable fallback name for a scanned item.
+     *
+     * @param  array<string, mixed>  $item
+     */
     protected function nameFor(array $item): string
     {
         return $item['vendor']
@@ -206,16 +254,22 @@ class JsonWriter
             ?? 'Unknown technology';
     }
 
+    /**
+     * Resolve the default duration label for a storage type.
+     */
     protected function durationFor(string $type): string
     {
         return match ($type) {
             'local_storage' => 'Persistent',
-            'session_storage' => 'Session',
             'script' => 'N/A',
             default => 'Session',
         };
     }
 
+    /**
+     * Ensure the target JSON file exists.
+     * @throws JsonException
+     */
     protected function ensureFileExists(string $path): void
     {
         File::ensureDirectoryExists(dirname($path));
@@ -225,21 +279,39 @@ class JsonWriter
         }
     }
 
+    /**
+     * Encode technology definitions as pretty JSON.
+     *
+     * @param array<string, mixed> $data
+     * @throws JsonException
+     */
     protected function encode(array $data): string
     {
         return json_encode(
                 $data,
-                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
             ).PHP_EOL;
     }
 
+    /**
+     * Normalize all technology definitions.
+     *
+     * @param  array<string, array<string, mixed>>  $technologies
+     * @return array<string, array<string, mixed>>
+     */
     protected function normalizeDefinitions(array $technologies): array
     {
         return collect($technologies)
-            ->map(fn (array $technology, string $key) => $this->normalizeDefinition($technology, $key))
+            ->map(fn (array $technology, string $key): array => $this->normalizeDefinition($technology, $key))
             ->all();
     }
 
+    /**
+     * Normalize a single technology definition.
+     *
+     * @param  array<string, mixed>  $technology
+     * @return array<string, mixed>
+     */
     protected function normalizeDefinition(array $technology, string $key): array
     {
         $translations = $technology['translations'] ?? [];

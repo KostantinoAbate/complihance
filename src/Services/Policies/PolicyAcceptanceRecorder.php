@@ -2,6 +2,7 @@
 
 namespace KostantinoAbate\Complihance\Services\Policies;
 
+use Illuminate\Database\Eloquent\Model;
 use KostantinoAbate\Complihance\Data\ConsentRequestContext;
 use KostantinoAbate\Complihance\Models\ComplihancePolicyAcceptance;
 use KostantinoAbate\Complihance\Models\Consent;
@@ -12,6 +13,11 @@ class PolicyAcceptanceRecorder
         protected PolicyManager $policies,
     ) {}
 
+    /**
+     * Record the acceptance of a policy for the given consent context.
+     *
+     * @param array<string, mixed> $metadata
+     */
     public function record(
         string $key,
         ConsentRequestContext $context,
@@ -28,34 +34,43 @@ class PolicyAcceptanceRecorder
             $context->anonymousId ?? '',
             $policy->key,
             $policy->version,
-            $source ?? '',
+            $source,
         ]));
 
-        return ComplihancePolicyAcceptance::query()->updateOrCreate(
-            ['identity_hash' => $identityHash],
-            [
-                'consent_id' => $consent?->id,
+        $acceptance = ComplihancePolicyAcceptance::query()->firstOrNew([
+            'identity_hash' => $identityHash,
+        ]);
 
-                'subject_type' => $context->subjectType,
-                'subject_id' => $context->subjectId,
+        $acceptance->forceFill([
+            'consent_id' => $consent?->id,
 
-                'session_id' => $context->sessionId,
-                'anonymous_id' => $context->anonymousId,
+            'subject_type' => $context->subjectType,
+            'subject_id' => $context->subjectId,
 
-                'policy_key' => $policy->key,
-                'policy_version' => $policy->version,
+            'session_id' => $context->sessionId,
+            'anonymous_id' => $context->anonymousId,
 
-                'source' => $source,
-                'metadata' => $metadata,
+            'policy_key' => $policy->key,
+            'policy_version' => $policy->version,
 
-                'ip_address' => $context->ipAddress,
-                'user_agent' => $context->userAgent,
+            'source' => $source,
+            'metadata' => $metadata,
 
-                'accepted_at' => now(),
-            ]
-        );
+            'ip_address' => $context->ipAddress,
+            'user_agent' => $context->userAgent,
+
+            'accepted_at' => now(),
+        ])->save();
+
+        return $acceptance;
     }
 
+    /**
+     * Record a policy acceptance manually using the current request as fallback context.
+     *
+     * @param Model|null $subject
+     * @param array<string, mixed> $metadata
+     */
     public function recordManual(
         string $key,
         mixed $subject = null,
@@ -74,8 +89,8 @@ class PolicyAcceptanceRecorder
             anonymousId: $anonymousId ?? $request->cookie(config('complihance.anonymous_cookie_name', 'complihance_anonymous_id')),
             ipAddress: $ipAddress ?? $request->ip(),
             userAgent: $userAgent ?? $request->userAgent(),
-            subjectType: $subject ? $subject->getMorphClass() : null,
-            subjectId: $subject?->getKey(),
+            subjectType: $subject instanceof Model ? $subject->getMorphClass() : null,
+            subjectId: $subject instanceof Model ? $subject->getKey() : null,
             subject: $subject,
             isSecure: $request->isSecure(),
         );

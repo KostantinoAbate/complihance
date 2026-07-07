@@ -8,6 +8,13 @@ use KostantinoAbate\Complihance\Models\Consent;
 
 class ConsentRecorder
 {
+    /**
+     * Persist a consent record for the given request context.
+     *
+     * @param  array<int, string>  $acceptedCategories
+     * @param  array<int, string>  $rejectedCategories
+     * @param  array<int, string>  $acceptedVendors
+     */
     public function record(
         ConsentRequestContext $context,
         array $acceptedCategories,

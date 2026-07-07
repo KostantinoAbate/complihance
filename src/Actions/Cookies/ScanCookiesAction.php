@@ -3,6 +3,7 @@
 namespace KostantinoAbate\Complihance\Actions\Cookies;
 
 use KostantinoAbate\Complihance\Services\Cookies\Scanner\Scanner;
+use Throwable;
 
 class ScanCookiesAction
 {
@@ -10,6 +11,13 @@ class ScanCookiesAction
         protected Scanner $scanner,
     ) {}
 
+    /**
+     * Scan one or more URLs for cookies and related browser storage entries.
+     *
+     * @param array<int, string>|string $urls
+     * @return array<string, mixed>
+     * @throws Throwable
+     */
     public function execute(
         array|string $urls,
         bool $httpHeaderOnly = false,

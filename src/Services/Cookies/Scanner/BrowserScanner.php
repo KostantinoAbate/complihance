@@ -2,17 +2,28 @@
 
 namespace KostantinoAbate\Complihance\Services\Cookies\Scanner;
 
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use JsonException;
+use RuntimeException;
 use Symfony\Component\Process\Process;
 
 class BrowserScanner
 {
+    /**
+     * Scan URLs with Playwright and collect cookies, storage entries, and scripts.
+     *
+     * @param array<int, string> $urls
+     * @return array{cookies: array<int, array<string, mixed>>, storage: array<int, array<string, mixed>>, scripts: array<int, array<string, mixed>>}
+     * @throws JsonException|FileNotFoundException
+     */
     public function scan(
-        array $urls,
-        bool $acceptConsent = true,
+        array   $urls,
+        bool    $acceptConsent = true,
         ?string $setupScript = null,
-    ): array {
+    ): array
+    {
         $scriptPath = $this->createTemporaryScript($urls, $acceptConsent, $setupScript);
 
         try {
@@ -20,25 +31,33 @@ class BrowserScanner
             $process->setTimeout(120);
             $process->run();
 
-            if (! $process->isSuccessful()) {
-                throw new \RuntimeException(
-                    "Browser cookie scanning failed.\n\n".
-                    "Make sure Node.js, Playwright, Chromium and the required system dependencies are installed.\n\n".
-                    "Install Playwright in your Laravel application:\n".
-                    "npm install -D playwright\n".
-                    "npx playwright install chromium\n\n".
-                    "In Docker/Linux environments, make sure Chromium system dependencies are installed in the image.\n\n".
-                    "Alternatively, run the HTTP-only scanner:\n".
-                    "php artisan complihance:scan-cookies <url> --http-header-only\n\n".
-                    "Exit code: {$process->getExitCode()}\n\n".
-                    "STDERR:\n".$process->getErrorOutput()."\n\n".
-                    "STDOUT:\n".$process->getOutput()
+            if (!$process->isSuccessful()) {
+                throw new RuntimeException(
+                    "Browser cookie scanning failed.\n\n" .
+                    "Make sure Node.js, Playwright, Chromium and the required system dependencies are installed.\n\n" .
+                    "Install Playwright in your Laravel application:\n" .
+                    "npm install -D playwright\n" .
+                    "npx playwright install chromium\n\n" .
+                    "In Docker/Linux environments, make sure Chromium system dependencies are installed in the image.\n\n" .
+                    "Alternatively, run the HTTP-only scanner:\n" .
+                    "php artisan complihance:scan-cookies <url> --http-header-only\n\n" .
+                    "Exit code: {$process->getExitCode()}\n\n" .
+                    "STDERR:\n" . $process->getErrorOutput() . "\n\n" .
+                    "STDOUT:\n" . $process->getOutput()
                 );
             }
 
-            $result = json_decode($process->getOutput(), true);
+            try {
+                $result = json_decode($process->getOutput(), true, 512, JSON_THROW_ON_ERROR);
+            } catch (JsonException) {
+                return [
+                    'cookies' => [],
+                    'storage' => [],
+                    'scripts' => [],
+                ];
+            }
 
-            if (! is_array($result)) {
+            if (!is_array($result)) {
                 return [
                     'cookies' => [],
                     'storage' => [],
@@ -64,12 +83,19 @@ class BrowserScanner
         }
     }
 
+    /**
+     * Create the temporary Playwright script used for scanning.
+     *
+     * @param array<int, string> $urls
+     * @throws JsonException|FileNotFoundException
+     */
     protected function createTemporaryScript(
-        array $urls,
-        bool $acceptConsent,
+        array   $urls,
+        bool    $acceptConsent,
         ?string $setupScript = null,
-    ): string {
-        $path = storage_path('framework/cache/complihance-cookie-scan-'.Str::uuid().'.mjs');
+    ): string
+    {
+        $path = storage_path('framework/cache/complihance-cookie-scan-' . Str::uuid() . '.mjs');
 
         File::ensureDirectoryExists(dirname($path));
 
@@ -78,202 +104,39 @@ class BrowserScanner
         return $path;
     }
 
+    /**
+     * Build the Playwright script content.
+     *
+     * @param array<int, string> $urls
+     * @throws JsonException
+     * @throws FileNotFoundException
+     */
     protected function script(
-        array $urls,
-        bool $acceptConsent,
+        array   $urls,
+        bool    $acceptConsent,
         ?string $setupScript = null,
-    ): string {
+    ): string
+    {
+        $setupScript = $setupScript !== null
+            ? realpath($setupScript) ?: $setupScript
+            : null;
+
         $encodedSetupScript = json_encode($setupScript, JSON_THROW_ON_ERROR);
         $encodedUrls = json_encode(array_values($urls), JSON_THROW_ON_ERROR);
-        $acceptConsentValue = $acceptConsent ? 'true' : 'false';
+        $encodedAcceptConsent = json_encode($acceptConsent, JSON_THROW_ON_ERROR);
 
-        return <<<JS
-import { chromium } from 'playwright';
+        $encodedSetupScriptJson = json_encode($encodedSetupScript, JSON_THROW_ON_ERROR);
+        $encodedUrlsJson = json_encode($encodedUrls, JSON_THROW_ON_ERROR);
+        $encodedAcceptConsentJson = json_encode($encodedAcceptConsent, JSON_THROW_ON_ERROR);
 
-const urls = {$encodedUrls};
-const acceptConsent = {$acceptConsentValue};
-const setupScriptPath = {$encodedSetupScript};
+        $template = File::get(
+            dirname(__DIR__, 5) . '/resources/js/scanner/browser-scanner.mjs.stub'
+        );
 
-const browser = await chromium.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-});
-
-const context = await browser.newContext();
-const page = await context.newPage();
-if (setupScriptPath) {
-    try {
-        const setupModule = await import(setupScriptPath);
-        const setup = setupModule.default || setupModule.setup;
-
-        if (typeof setup !== 'function') {
-            throw new Error('Setup script must export a default function or a named setup function.');
-        }
-
-        await setup({ page, context, browser });
-    } catch (error) {
-        console.error('Failed to execute setup script.');
-        console.error(error.message);
-        process.exit(3);
-    }
-}
-const scannedCookies = new Map();
-const scannedStorageItems = new Map();
-const scannedScripts = new Map();
-
-function cookieKey(cookie) {
-    return `\${cookie.name}|\${cookie.domain || ''}|\${cookie.path || '/'}`;
-}
-
-function storageKey(item) {
-    return `\${item.type}|\${item.key}|\${item.url}`;
-}
-
-function scriptKey(script) {
-    return `\${script.src}|\${script.url}`;
-}
-
-function normalizeCookie(cookie, url) {
-    return {
-        name: cookie.name,
-        domain: cookie.domain || null,
-        path: cookie.path || '/',
-        url,
-        secure: Boolean(cookie.secure),
-        http_only: Boolean(cookie.httpOnly),
-        same_site: cookie.sameSite || null,
-        expires_at: cookie.expires && cookie.expires > 0
-            ? new Date(cookie.expires * 1000).toISOString()
-            : null,
-    };
-}
-
-function normalizeStorageItem(type, key, value, url) {
-    return {
-        type,
-        key,
-        value_preview: String(value).slice(0, 200),
-        url,
-    };
-}
-
-function normalizeScript(src, url) {
-    return {
-        type: 'script',
-        src,
-        url,
-    };
-}
-
-async function collectStorage(page, url) {
-    const storageItems = await page.evaluate(() => {
-        const localStorageItems = Object.entries(window.localStorage).map(([key, value]) => ({
-            type: 'local_storage',
-            key,
-            value,
-        }));
-
-        const sessionStorageItems = Object.entries(window.sessionStorage).map(([key, value]) => ({
-            type: 'session_storage',
-            key,
-            value,
-        }));
-
-        return [...localStorageItems, ...sessionStorageItems];
-    });
-
-    storageItems.forEach((item) => {
-        const normalized = normalizeStorageItem(item.type, item.key, item.value, url);
-        const key = storageKey(normalized);
-
-        if (! scannedStorageItems.has(key)) {
-            scannedStorageItems.set(key, normalized);
-        }
-    });
-}
-
-async function collectScripts(page, url) {
-    const scripts = await page.evaluate(() =>
-        Array.from(document.scripts)
-            .map((script) => script.src)
-            .filter(Boolean)
-    );
-
-    scripts.forEach((src) => {
-        const normalized = normalizeScript(src, url);
-        const key = scriptKey(normalized);
-
-        if (! scannedScripts.has(key)) {
-            scannedScripts.set(key, normalized);
-        }
-    });
-}
-
-async function acceptComplihanceConsent(page) {
-    const selectors = [
-        '[data-complihance-accept-all]',
-        '[data-complihance-action="accept-all"]',
-        'button[name="complihance_accept_all"]',
-        '#complihance-accept-all',
-    ];
-
-    for (const selector of selectors) {
-        const element = page.locator(selector).first();
-
-        if (await element.count() > 0) {
-            try {
-                await element.click({ timeout: 3000 });
-                await page.waitForTimeout(1500);
-                return true;
-            } catch (error) {
-                // Try next selector
-            }
-        }
-    }
-
-    return false;
-}
-
-for (const url of urls) {
-    try {
-        await page.goto(url, {
-            waitUntil: 'networkidle',
-            timeout: 30000,
-        });
-    } catch (error) {
-        console.error('Failed to scan URL: ' + url);
-        console.error(error.message);
-        process.exit(2);
-    }
-
-    await page.waitForTimeout(1000);
-
-    if (acceptConsent) {
-        await acceptComplihanceConsent(page);
-        await page.waitForTimeout(2000);
-    }
-
-    const cookies = await context.cookies();
-
-    cookies.forEach((cookie) => {
-        const key = cookieKey(cookie);
-
-        if (! scannedCookies.has(key)) {
-            scannedCookies.set(key, normalizeCookie(cookie, url));
-        }
-    });
-
-    await collectStorage(page, url);
-    await collectScripts(page, url);
-}
-
-await browser.close();
-
-console.log(JSON.stringify({
-    cookies: Array.from(scannedCookies.values()),
-    storage: Array.from(scannedStorageItems.values()),
-    scripts: Array.from(scannedScripts.values()),
-}));
-JS;
+        return strtr($template, [
+            '__URLS_JSON__' => $encodedUrlsJson,
+            '__ACCEPT_CONSENT_JSON__' => $encodedAcceptConsentJson,
+            '__SETUP_SCRIPT_PATH_JSON__' => $encodedSetupScriptJson,
+        ]);
     }
 }

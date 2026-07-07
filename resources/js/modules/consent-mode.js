@@ -1,28 +1,65 @@
-function categoriesToObject(categories) {
-    if (!categories) return {};
+/**
+ * @typedef {Record<string, boolean>} CategoryLookup
+ */
 
-    if (Array.isArray(categories)) {
-        return categories.reduce((carry, category) => {
-            carry[category] = true;
-            return carry;
-        }, {});
+/**
+ * @typedef {(command: string, action: string, params: Record<string, string>) => void} Gtag
+ */
+
+/**
+ * Converts a category list into a lookup object.
+ *
+ * @param {string[]|CategoryLookup|null|undefined} categories Selected categories.
+ * @returns {CategoryLookup}
+ */
+function categoriesToObject(categories) {
+    if (!categories) {
+        return {};
     }
 
-    return categories;
+    if (!Array.isArray(categories)) {
+        return categories;
+    }
+
+    /** @type {CategoryLookup} */
+    const lookup = {};
+
+    categories.forEach((category) => {
+        lookup[category] = true;
+    });
+
+    return lookup;
 }
 
+/**
+ * Updates Google Consent Mode according to the selected consent categories.
+ *
+ * @param {string[]|CategoryLookup|null|undefined} categories Selected categories.
+ * @returns {void}
+ */
 export function updateConsentMode(categories) {
-    if (typeof window.gtag !== 'function') return;
+    /** @type {unknown} */
+    const maybeGtag = window['gtag'];
+
+    if (typeof maybeGtag !== 'function') {
+        return;
+    }
+
+    /** @type {Gtag} */
+    const gtag = maybeGtag;
 
     const selectedCategories = categoriesToObject(categories);
+    const analyticsGranted = selectedCategories.analytics === true;
+    const marketingGranted = selectedCategories.marketing === true;
+    const functionalGranted = selectedCategories.functional === true;
 
-    window.gtag('consent', 'update', {
-        analytics_storage: selectedCategories.analytics ? 'granted' : 'denied',
-        ad_storage: selectedCategories.marketing ? 'granted' : 'denied',
-        ad_user_data: selectedCategories.marketing ? 'granted' : 'denied',
-        ad_personalization: selectedCategories.marketing ? 'granted' : 'denied',
-        functionality_storage: selectedCategories.functional ? 'granted' : 'denied',
-        personalization_storage: selectedCategories.functional ? 'granted' : 'denied',
+    gtag('consent', 'update', {
+        analytics_storage: analyticsGranted ? 'granted' : 'denied',
+        ad_storage: marketingGranted ? 'granted' : 'denied',
+        ad_user_data: marketingGranted ? 'granted' : 'denied',
+        ad_personalization: marketingGranted ? 'granted' : 'denied',
+        functionality_storage: functionalGranted ? 'granted' : 'denied',
+        personalization_storage: functionalGranted ? 'granted' : 'denied',
         security_storage: 'granted',
     });
 }

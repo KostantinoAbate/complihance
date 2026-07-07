@@ -9,8 +9,12 @@ use KostantinoAbate\Complihance\Services\Policies\Repositories\Contracts\PolicyR
 
 class DatabasePolicyRepository implements PolicyRepository
 {
+    /**
+     * Retrieve the latest active policy version from the database.
+     */
     public function current(string $key): Policy
     {
+        /** @var PolicyVersion|null $policy */
         $policy = PolicyVersion::query()
             ->where('key', $key)
             ->where('is_active', true)
@@ -19,7 +23,7 @@ class DatabasePolicyRepository implements PolicyRepository
             ->first();
 
         if (! $policy) {
-            throw new InvalidArgumentException("No active policy found for [{$key}].");
+            throw new InvalidArgumentException("No active policy found for [$key].");
         }
 
         return new Policy(

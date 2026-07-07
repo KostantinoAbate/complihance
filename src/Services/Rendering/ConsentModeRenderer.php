@@ -15,25 +15,36 @@ class ConsentModeRenderer
         protected CurrentConsentResolver $currentConsentResolver,
     ) {}
 
+    /**
+     * Render the Google Consent Mode bootstrap script.
+     */
     public function render(): string
     {
         if (! config('complihance.consent_mode.enabled', true)) {
             return '';
         }
 
-        $currentConsentMode = null;
-
-        $consent = $this->currentConsentResolver->resolve($this->request);
-
-        if ($consent && ! $consent->revoked_at) {
-            $currentConsentMode = $this->consentMode->fromCategories(
-                array_values(array_unique($consent->accepted_categories ?? []))
-            );
-        }
-
         return $this->view->make('complihance::consent-mode', [
             'defaultConsentMode' => $this->consentMode->defaultPayload(),
-            'currentConsentMode' => $currentConsentMode,
+            'currentConsentMode' => $this->currentConsentMode(),
         ])->render();
+    }
+
+    /**
+     * Resolve the current Consent Mode payload from the active consent.
+     *
+     * @return array<string, string>|null
+     */
+    protected function currentConsentMode(): ?array
+    {
+        $consent = $this->currentConsentResolver->resolve($this->request);
+
+        if (! $consent || $consent->revoked_at) {
+            return null;
+        }
+
+        return $this->consentMode->fromCategories(
+            array_values(array_unique($consent->accepted_categories ?? [])),
+        );
     }
 }

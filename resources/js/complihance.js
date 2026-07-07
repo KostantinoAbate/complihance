@@ -10,14 +10,29 @@ import {
 } from './modules/blocked-content';
 import { updateConsentMode } from './modules/consent-mode';
 
+/**
+ * @typedef {object} ComplihanceUi
+ * @property {typeof refreshBlockedContent} refreshBlockedContent
+ * @property {typeof loadBlockedContent} loadBlockedContent
+ * @property {typeof updateConsentMode} updateConsentMode
+ */
+
+/**
+ * Bootstraps the default Complihance frontend UI.
+ *
+ * @returns {void}
+ */
 (function () {
-    window.Complihance = {
-        ...(window.Complihance || {}),
-        ui: {
-            refreshBlockedContent,
-            loadBlockedContent,
-            updateConsentMode,
-        },
+    /** @type {ComplihanceUi} */
+    const ui = {
+        refreshBlockedContent,
+        loadBlockedContent,
+        updateConsentMode,
+    };
+
+    window['Complihance'] = {
+        ...(window['Complihance'] || {}),
+        ui,
     };
 
     document
@@ -29,16 +44,16 @@ import { updateConsentMode } from './modules/consent-mode';
             initConsentForm(container);
         });
 
-    window.Complihance.onConsentChanged(() => {
+    window['Complihance'].onConsentChanged(() => {
         refreshBlockedContent();
     });
 
     Promise.all([
-        window.Complihance.getConsent(),
-        window.Complihance.getConfiguration(),
+        window['Complihance'].getConsent(),
+        window['Complihance'].getConfiguration(),
     ])
         .catch(() => {
-            // ignore bootstrap errors
+            // Ignore bootstrap errors and continue with UI initialization.
         })
         .finally(() => {
             refreshBlockedContent();

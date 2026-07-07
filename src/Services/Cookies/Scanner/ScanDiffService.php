@@ -2,10 +2,17 @@
 
 namespace KostantinoAbate\Complihance\Services\Cookies\Scanner;
 
+use DateTimeInterface;
 use KostantinoAbate\Complihance\Models\CookieScan;
+use KostantinoAbate\Complihance\Models\CookieScanResult;
 
 class ScanDiffService
 {
+    /**
+     * Compare two cookie scans and return added, removed, changed, and unchanged items.
+     *
+     * @return array<string, mixed>
+     */
     public function diff(CookieScan $from, CookieScan $to, bool $includeVolatile = false): array
     {
         $fromResults = $this->indexResults($from);
@@ -56,12 +63,12 @@ class ScanDiffService
 
         return [
             'from_scan' => [
-                'id' => $from->id,
-                'uuid' => $from->uuid,
+                'id' => $from->getKey(),
+                'uuid' => $from->getAttribute('uuid'),
             ],
             'to_scan' => [
-                'id' => $to->id,
-                'uuid' => $to->uuid,
+                'id' => $to->getKey(),
+                'uuid' => $to->getAttribute('uuid'),
             ],
             'summary' => [
                 'added' => count($addedKeys),
@@ -70,41 +77,52 @@ class ScanDiffService
                 'unchanged' => count($commonKeys) - count($changed),
             ],
             'added' => array_values(array_map(
-                fn (string $key) => $toResults[$key],
+                fn (string $key): array => $toResults[$key],
                 $addedKeys
             )),
             'removed' => array_values(array_map(
-                fn (string $key) => $fromResults[$key],
+                fn (string $key): array => $fromResults[$key],
                 $removedKeys
             )),
             'changed' => $changed,
         ];
     }
 
+    /**
+     * Index scan results by their logical comparison key.
+     *
+     * @return array<string, array<string, mixed>>
+     */
     protected function indexResults(CookieScan $scan): array
     {
         return $scan->results()
             ->get()
-            ->mapWithKeys(fn ($result) => [
+            ->mapWithKeys(fn (CookieScanResult $result): array => [
                 $this->logicalKey($result) => [$result->toArray()],
             ])
-            ->map(fn (array $items) => $items[0])
+            ->map(fn (array $items): array => $items[0])
             ->all();
     }
 
-    protected function logicalKey($result): string
+    /**
+     * Build the logical key used to compare scan results.
+     */
+    protected function logicalKey(CookieScanResult $result): string
     {
         return implode('|', [
-            $result->type,
-            $result->key,
-            $result->domain,
-            $result->path,
+            $result->getAttribute('type'),
+            $result->getAttribute('key'),
+            $result->getAttribute('domain'),
+            $result->getAttribute('path'),
         ]);
     }
 
+    /**
+     * Normalize values before comparing them.
+     */
     protected function normalizeValue(mixed $value): mixed
     {
-        if ($value instanceof \DateTimeInterface) {
+        if ($value instanceof DateTimeInterface) {
             return $value->format(DATE_ATOM);
         }
 

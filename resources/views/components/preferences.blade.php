@@ -2,7 +2,10 @@
     data-complihance-preferences
     class="complihance-preferences"
 >
-    <h2 class="complihance-title">
+    <h2
+        id="complihance-preferences-title"
+        class="complihance-title"
+    >
         {{ $texts['preferences']['title'] ?? __('Manage Cookie Preferences') }}
     </h2>
 
@@ -14,12 +17,15 @@
                 @php
                     $required = (bool) ($category['required'] ?? false);
                     $vendors = $vendorsByCategory[$key] ?? [];
-                    $categoryInputId = 'preferences-cookie-category-' . $loop->iteration;
+                    $categoryInputId = 'complihance-preferences-category-' . $loop->iteration;
                     $categoryChecked = $required || in_array($key, $acceptedCategories, true);
                 @endphp
 
                 <div class="complihance-card">
-                    <label class="complihance-row">
+                    <label
+                        class="complihance-row"
+                        for="{{ $categoryInputId }}"
+                    >
                         <input
                             class="complihance-checkbox"
                             type="checkbox"
@@ -49,15 +55,20 @@
                         <div class="complihance-vendors">
                             @foreach ($vendors as $vendorKey => $vendor)
                                 @php
+                                    $vendorInputId = 'complihance-preferences-vendor-' . $loop->parent->iteration . '-' . $loop->iteration;
                                     $vendorChecked = $required || in_array($vendorKey, $acceptedVendors, true);
                                 @endphp
 
-                                <label class="complihance-vendor">
+                                <label
+                                    class="complihance-vendor"
+                                    for="{{ $vendorInputId }}"
+                                >
                                     <input
                                         class="complihance-checkbox"
                                         type="checkbox"
                                         name="vendors[]"
                                         value="{{ $vendorKey }}"
+                                        id="{{ $vendorInputId }}"
                                         data-complihance-vendor="{{ $vendorKey }}"
                                         data-complihance-vendor-category="{{ $key }}"
                                         @checked($vendorChecked)
@@ -94,6 +105,8 @@
         <p
             data-complihance-preferences-feedback
             class="complihance-feedback complihance-hidden"
+            role="status"
+            aria-live="polite"
         >
             {{ $texts['preferences']['saved'] ?? __('Preferences correctly updated!') }}
         </p>

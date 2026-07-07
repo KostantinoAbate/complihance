@@ -7,6 +7,9 @@ use Illuminate\Support\Str;
 
 class AnonymousIdResolver
 {
+    /**
+     * Resolve the anonymous visitor identifier from the request or generate one.
+     */
     public function resolve(Request $request): string
     {
         return $request->cookie(

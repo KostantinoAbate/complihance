@@ -4,11 +4,17 @@ namespace KostantinoAbate\Complihance\Data;
 
 use Symfony\Component\HttpFoundation\Cookie;
 
-class StoredConsentResult
+/**
+ * Result returned after storing consent preferences.
+ */
+readonly class StoredConsentResult
 {
+    /**
+     * @param  array<string, mixed>  $payload
+     */
     public function __construct(
-        public readonly array $payload,
-        public readonly Cookie $consentCookie,
-        public readonly Cookie $anonymousCookie,
+        public array  $payload,
+        public Cookie $consentCookie,
+        public Cookie $anonymousCookie,
     ) {}
 }

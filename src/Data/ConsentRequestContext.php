@@ -2,16 +2,19 @@
 
 namespace KostantinoAbate\Complihance\Data;
 
-class ConsentRequestContext
+/**
+ * Immutable context extracted from the current consent request.
+ */
+readonly class ConsentRequestContext
 {
     public function __construct(
-        public readonly ?string $sessionId,
-        public readonly ?string $anonymousId,
-        public readonly ?string $ipAddress,
-        public readonly ?string $userAgent,
-        public readonly ?string $subjectType,
-        public readonly mixed $subjectId,
-        public readonly mixed $subject,
-        public readonly bool $isSecure,
+        public ?string $sessionId,
+        public ?string $anonymousId,
+        public ?string $ipAddress,
+        public ?string $userAgent,
+        public ?string $subjectType,
+        public mixed   $subjectId,
+        public mixed   $subject,
+        public bool    $isSecure,
     ) {}
 }
