@@ -9,6 +9,7 @@ trait ResolvesConsentDisplayData
 {
     /**
      * Resolve localized texts, categories and optional vendors grouped by category.
+     *
      * @throws FileNotFoundException
      */
     protected function resolveConsentDisplayData(): void
@@ -29,7 +30,7 @@ trait ResolvesConsentDisplayData
                     return false;
                 }
 
-                return !($this->categories[$categoryKey]['required'] ?? false);
+                return ! ($this->categories[$categoryKey]['required'] ?? false);
             })
             ->groupBy('category')
             ->map(fn (Collection $vendors): array => $vendors->keyBy('key')->all())

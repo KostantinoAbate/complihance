@@ -9,6 +9,7 @@ class ComplihanceScriptRenderer
 {
     /**
      * Render the package script partial with the resolved frontend assets.
+     *
      * @throws Throwable
      */
     public function render(): string

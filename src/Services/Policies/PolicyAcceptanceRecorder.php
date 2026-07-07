@@ -16,7 +16,7 @@ class PolicyAcceptanceRecorder
     /**
      * Record the acceptance of a policy for the given consent context.
      *
-     * @param array<string, mixed> $metadata
+     * @param  array<string, mixed>  $metadata
      */
     public function record(
         string $key,
@@ -68,8 +68,8 @@ class PolicyAcceptanceRecorder
     /**
      * Record a policy acceptance manually using the current request as fallback context.
      *
-     * @param Model|null $subject
-     * @param array<string, mixed> $metadata
+     * @param  Model|null  $subject
+     * @param  array<string, mixed>  $metadata
      */
     public function recordManual(
         string $key,

@@ -81,7 +81,7 @@ class BannerVisibilityResolver
     /**
      * Determine whether the accepted cookie configuration version is outdated.
      *
-     * @param array<string, mixed> $decodedConsent
+     * @param  array<string, mixed>  $decodedConsent
      */
     protected function cookieConfigurationChanged(array $decodedConsent): bool
     {

@@ -29,6 +29,7 @@ class StoreConsentAction
 
     /**
      * Validate, store, and serialize a consent preference payload.
+     *
      * @throws JsonException
      */
     public function execute(Request $request): StoredConsentResult

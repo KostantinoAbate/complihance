@@ -16,7 +16,7 @@ class ConsentPayloadBuilder
     {
         return [
             'has_consent' => $consent !== null && $consent->revoked_at === null,
-            'requires_renewal' => !$consent || $this->requiresRenewal($consent),
+            'requires_renewal' => ! $consent || $this->requiresRenewal($consent),
             'consent' => $consent ? $this->consentData($consent) : null,
         ];
     }

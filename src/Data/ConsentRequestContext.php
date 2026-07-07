@@ -13,8 +13,8 @@ readonly class ConsentRequestContext
         public ?string $ipAddress,
         public ?string $userAgent,
         public ?string $subjectType,
-        public mixed   $subjectId,
-        public mixed   $subject,
-        public bool    $isSecure,
+        public mixed $subjectId,
+        public mixed $subject,
+        public bool $isSecure,
     ) {}
 }

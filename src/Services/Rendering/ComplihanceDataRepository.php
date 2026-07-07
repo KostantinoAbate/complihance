@@ -12,6 +12,7 @@ class ComplihanceDataRepository
      * Get localized consent categories.
      *
      * @return array<int, array<string, mixed>>
+     *
      * @throws FileNotFoundException
      */
     public function categories(?string $locale = null): array
@@ -26,6 +27,7 @@ class ComplihanceDataRepository
      * Get raw consent categories from the configured JSON file.
      *
      * @return array<string, array<string, mixed>>
+     *
      * @throws FileNotFoundException
      */
     public function rawCategories(): array
@@ -37,6 +39,7 @@ class ComplihanceDataRepository
      * Get localized known technologies.
      *
      * @return array<int, array<string, mixed>>
+     *
      * @throws FileNotFoundException
      */
     public function technologies(?string $locale = null): array
@@ -51,6 +54,7 @@ class ComplihanceDataRepository
      * Get raw known technologies from the configured JSON file.
      *
      * @return array<string, array<string, mixed>>
+     *
      * @throws FileNotFoundException
      */
     public function rawTechnologies(): array
@@ -62,7 +66,9 @@ class ComplihanceDataRepository
      * Get all configured category keys.
      *
      * @return array<int, string>
+     *
      * @throws FileNotFoundException
+     *
      * @noinspection PhpUnused
      */
     public function categoryKeys(): array
@@ -74,7 +80,9 @@ class ComplihanceDataRepository
      * Get the keys of categories that are always required.
      *
      * @return array<int, string>
+     *
      * @throws FileNotFoundException
+     *
      * @noinspection PhpUnused
      */
     public function requiredCategoryKeys(): array
@@ -90,6 +98,7 @@ class ComplihanceDataRepository
      * Get the Consent Mode mapping configured for each category.
      *
      * @return array<string, array<string, string>>
+     *
      * @throws FileNotFoundException
      */
     public function consentModeMapping(): array
@@ -124,6 +133,7 @@ class ComplihanceDataRepository
      * Get localized UI texts.
      *
      * @return array<string, string>
+     *
      * @throws FileNotFoundException
      */
     public function texts(?string $locale = null): array
@@ -151,6 +161,7 @@ class ComplihanceDataRepository
      * Get technologies grouped by vendor.
      *
      * @return array<int, array<string, mixed>>
+     *
      * @throws FileNotFoundException
      */
     public function vendors(?string $locale = null): array
@@ -174,7 +185,7 @@ class ComplihanceDataRepository
     /**
      * Localize keyed configuration items.
      *
-     * @param array<string, array<string, mixed>> $items
+     * @param  array<string, array<string, mixed>>  $items
      * @return array<int, array<string, mixed>>
      */
     protected function localizedItems(array $items, ?string $locale = null): array
@@ -195,7 +206,7 @@ class ComplihanceDataRepository
     /**
      * Apply the best available translation to a configuration item.
      *
-     * @param array<string, mixed> $item
+     * @param  array<string, mixed>  $item
      * @return array<string, mixed>
      */
     protected function localizeItem(array $item, string $locale): array
@@ -223,6 +234,7 @@ class ComplihanceDataRepository
      * package assets can be overridden progressively by the host application.
      *
      * @return array<string, mixed>
+     *
      * @throws FileNotFoundException
      */
     protected function readJson(string $path): array

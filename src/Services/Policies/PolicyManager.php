@@ -61,6 +61,7 @@ class PolicyManager
      * Retrieve the configured policy keys.
      *
      * @noinspection PhpUnused
+     *
      * @return array<int, string>
      */
     public function configuredKeys(): array
@@ -71,7 +72,7 @@ class PolicyManager
     /**
      * Facade-friendly shortcut for manually recording a policy acceptance.
      *
-     * @param array<string, mixed> $metadata
+     * @param  array<string, mixed>  $metadata
      */
     public function accept(
         string $key,

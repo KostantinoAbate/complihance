@@ -17,7 +17,8 @@ class JsonWriter
     /**
      * Add missing technology definitions for scanned items.
      *
-     * @param array<int, array<string, mixed>> $items
+     * @param  array<int, array<string, mixed>>  $items
+     *
      * @throws JsonException
      */
     public function addMissingTechnologies(array $items): int
@@ -57,6 +58,7 @@ class JsonWriter
 
     /**
      * Ensure Complihance core technology definitions exist.
+     *
      * @throws JsonException
      */
     public function ensureCoreTechnologies(): int
@@ -111,7 +113,8 @@ class JsonWriter
     /**
      * Add missing technology definitions by key.
      *
-     * @param array<string, array<string, mixed>> $definitions
+     * @param  array<string, array<string, mixed>>  $definitions
+     *
      * @throws JsonException
      */
     public function addMissingTechnologyDefinitions(array $definitions): int
@@ -268,6 +271,7 @@ class JsonWriter
 
     /**
      * Ensure the target JSON file exists.
+     *
      * @throws JsonException
      */
     protected function ensureFileExists(string $path): void
@@ -282,15 +286,16 @@ class JsonWriter
     /**
      * Encode technology definitions as pretty JSON.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
+     *
      * @throws JsonException
      */
     protected function encode(array $data): string
     {
         return json_encode(
-                $data,
-                JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-            ).PHP_EOL;
+            $data,
+            JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+        ).PHP_EOL;
     }
 
     /**

@@ -26,6 +26,7 @@ class ScanCookiesCommand extends Command
 
     /**
      * Execute the console command.
+     *
      * @throws Throwable
      */
     public function handle(
@@ -77,7 +78,7 @@ class ScanCookiesCommand extends Command
         $result = $scanCookies->execute(
             urls: $urls,
             httpHeaderOnly: (bool) $this->option('http-header-only'),
-            acceptConsent: !$this->option('no-consent'),
+            acceptConsent: ! $this->option('no-consent'),
             setupScript: $this->option('setup-script'),
         );
 

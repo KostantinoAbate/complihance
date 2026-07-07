@@ -9,7 +9,7 @@ class SubjectResolver
     /**
      * Resolve the authenticated subject for the current request.
      */
-    public function resolve(): Authenticatable|null
+    public function resolve(): ?Authenticatable
     {
         return auth()->check() ? auth()->user() : null;
     }

@@ -94,7 +94,7 @@ class SitemapUrlResolver
     /**
      * Calculate how many URLs can still be collected before reaching the limit.
      *
-     * @param array<int, string> $urls
+     * @param  array<int, string>  $urls
      */
     protected function remainingLimit(?int $limit, array $urls): ?int
     {
@@ -106,7 +106,7 @@ class SitemapUrlResolver
     /**
      * Determine whether the configured URL collection limit has been reached.
      *
-     * @param array<int, string> $urls
+     * @param  array<int, string>  $urls
      */
     protected function limitReached(?int $limit, array $urls): bool
     {
