@@ -5,7 +5,7 @@ use KostantinoAbate\Complihance\Services\Cookies\Scanner\SitemapUrlResolver;
 
 it('resolves urls from sitemap xml', function () {
     Http::fake([
-        'https://example.com/sitemap.xml' => Http::response(<<<XML
+        'https://example.com/sitemap.xml' => Http::response(<<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
@@ -28,7 +28,7 @@ XML),
 
 it('resolves urls from sitemap index', function () {
     Http::fake([
-        'https://example.com/sitemap.xml' => Http::response(<<<XML
+        'https://example.com/sitemap.xml' => Http::response(<<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <sitemap>
@@ -36,7 +36,7 @@ it('resolves urls from sitemap index', function () {
     </sitemap>
 </sitemapindex>
 XML),
-        'https://example.com/pages.xml' => Http::response(<<<XML
+        'https://example.com/pages.xml' => Http::response(<<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
@@ -59,7 +59,7 @@ XML),
 
 it('applies sitemap url limit', function () {
     Http::fake([
-        'https://example.com/sitemap.xml' => Http::response(<<<XML
+        'https://example.com/sitemap.xml' => Http::response(<<<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url><loc>https://example.com/one</loc></url>

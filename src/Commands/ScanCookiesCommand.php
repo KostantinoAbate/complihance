@@ -27,8 +27,7 @@ class ScanCookiesCommand extends Command
         ScanCookiesAction $scanCookies,
         ScanReportExporter $exporter,
         SitemapUrlResolver $sitemapResolver,
-    ): int
-    {
+    ): int {
         $urls = $this->argument('url');
 
         if ($this->option('sitemap')) {
