@@ -5,14 +5,12 @@ namespace KostantinoAbate\Complihance\Services\Cookies\Scanner;
 use Illuminate\Support\Str;
 use KostantinoAbate\Complihance\Models\CookieScan;
 use KostantinoAbate\Complihance\Models\CookieScanResult;
-use KostantinoAbate\Complihance\Services\Cookies\Scanner\Patterns\KnownCookieMatcher;
-use KostantinoAbate\Complihance\Services\Cookies\Scanner\Patterns\KnownScriptMatcher;
+use KostantinoAbate\Complihance\Services\Cookies\Scanner\Patterns\TechnologyMatcher;
 
-class CookieScanPersister
+class ScanPersister
 {
     public function __construct(
-        protected KnownCookieMatcher $matcher,
-        protected KnownScriptMatcher $scriptMatcher,
+        protected TechnologyMatcher $matcher,
     ) {}
 
     public function start(array $urls, array $options = []): CookieScan
@@ -28,14 +26,15 @@ class CookieScanPersister
 
     public function storeCookie(CookieScan $scan, array $cookie): CookieScanResult
     {
-        $match = ! empty($cookie['name'])
-            ? $this->matcher->match($cookie['name'])
+        $name = $cookie['name'] ?? '';
+        $match = $name !== ''
+            ? $this->matcher->match('cookie', $name)
             : null;
 
         $identityHash = hash('sha256', implode('|', [
             $scan->id,
             'cookie',
-            $cookie['name'] ?? '',
+            $name,
             $cookie['domain'] ?? '',
             $cookie['path'] ?? '/',
         ]));
@@ -45,8 +44,8 @@ class CookieScanPersister
             [
                 'scan_id' => $scan->id,
                 'type' => 'cookie',
-                'key' => $cookie['name'] ?? null,
-                'name' => $cookie['name'] ?? null,
+                'key' => $name ?: null,
+                'name' => $name ?: null,
                 'domain' => $cookie['domain'] ?? null,
                 'path' => $cookie['path'] ?? '/',
                 'url' => $cookie['url'] ?? null,
@@ -56,7 +55,48 @@ class CookieScanPersister
                 'http_only' => $cookie['http_only'] ?? false,
                 'same_site' => $cookie['same_site'] ?? null,
                 'expires_at' => $cookie['expires_at'] ?? null,
-                'metadata' => $cookie['metadata'] ?? null,
+                'metadata' => [
+                    ...($cookie['metadata'] ?? []),
+                    'matched_key' => $match['matched_key'] ?? null,
+                    'matched_pattern' => $match['matched_pattern'] ?? null,
+                ],
+            ]
+        );
+    }
+
+    public function storeStorageItem(CookieScan $scan, array $item): CookieScanResult
+    {
+        $type = $item['type'] ?? 'local_storage';
+        $key = $item['key'] ?? '';
+
+        $match = $key !== ''
+            ? $this->matcher->match($type, $key)
+            : null;
+
+        $identityHash = hash('sha256', implode('|', [
+            $scan->id,
+            $type,
+            $key,
+            $item['url'] ?? '',
+        ]));
+
+        return CookieScanResult::query()->updateOrCreate(
+            ['identity_hash' => $identityHash],
+            [
+                'scan_id' => $scan->id,
+                'type' => $type,
+                'key' => $key ?: null,
+                'value_preview' => $item['value_preview'] ?? null,
+                'url' => $item['url'] ?? null,
+                'vendor' => $match['vendor'] ?? null,
+                'category' => $match['category'] ?? 'unclassified',
+                'secure' => false,
+                'http_only' => false,
+                'metadata' => [
+                    ...($item['metadata'] ?? []),
+                    'matched_key' => $match['matched_key'] ?? null,
+                    'matched_pattern' => $match['matched_pattern'] ?? null,
+                ],
             ]
         );
     }
@@ -64,7 +104,10 @@ class CookieScanPersister
     public function storeScript(CookieScan $scan, array $script): CookieScanResult
     {
         $src = $script['src'] ?? '';
-        $match = $src !== '' ? $this->scriptMatcher->match($src) : null;
+
+        $match = $src !== ''
+            ? $this->matcher->match('script', $src)
+            : null;
 
         $identityHash = hash('sha256', implode('|', [
             $scan->id,
@@ -78,8 +121,8 @@ class CookieScanPersister
             [
                 'scan_id' => $scan->id,
                 'type' => 'script',
-                'key' => $src,
-                'value_preview' => $src,
+                'key' => $src ?: null,
+                'value_preview' => $src ?: null,
                 'url' => $script['url'] ?? null,
                 'vendor' => $match['vendor'] ?? null,
                 'category' => $match['category'] ?? 'unclassified',
@@ -87,7 +130,8 @@ class CookieScanPersister
                 'http_only' => false,
                 'metadata' => [
                     'src' => $src,
-                    'matched_pattern' => $match['pattern'] ?? null,
+                    'matched_key' => $match['matched_key'] ?? null,
+                    'matched_pattern' => $match['matched_pattern'] ?? null,
                 ],
             ]
         );
@@ -111,31 +155,5 @@ class CookieScanPersister
             ],
             'finished_at' => now(),
         ]);
-    }
-
-    public function storeStorageItem(CookieScan $scan, array $item): CookieScanResult
-    {
-        $type = $item['type'] ?? 'local_storage';
-
-        $identityHash = hash('sha256', implode('|', [
-            $scan->id,
-            $type,
-            $item['key'] ?? '',
-            $item['url'] ?? '',
-        ]));
-
-        return CookieScanResult::query()->updateOrCreate(
-            ['identity_hash' => $identityHash],
-            [
-                'scan_id' => $scan->id,
-                'type' => $type,
-                'key' => $item['key'] ?? null,
-                'value_preview' => $item['value_preview'] ?? null,
-                'url' => $item['url'] ?? null,
-                'secure' => false,
-                'http_only' => false,
-                'metadata' => $item['metadata'] ?? null,
-            ]
-        );
     }
 }

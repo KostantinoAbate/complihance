@@ -29,7 +29,7 @@ beforeEach(function () {
     Config::set('complihance.policies.cookie.version', '2026-06-30');
 
     Config::set('complihance.data.categories_path', __DIR__.'/../Fixtures/categories.json');
-    Config::set('complihance.data.cookies_path', __DIR__.'/../Fixtures/cookies.json');
+    Config::set('complihance.data.technologies_path', __DIR__.'/../Fixtures/cookies.json');
 });
 
 it('stores guest policy acceptance with anonymous id', function () {

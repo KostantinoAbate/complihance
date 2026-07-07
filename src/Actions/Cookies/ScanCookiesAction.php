@@ -2,12 +2,12 @@
 
 namespace KostantinoAbate\Complihance\Actions\Cookies;
 
-use KostantinoAbate\Complihance\Services\Cookies\Scanner\CookieScanner;
+use KostantinoAbate\Complihance\Services\Cookies\Scanner\Scanner;
 
 class ScanCookiesAction
 {
     public function __construct(
-        protected CookieScanner $scanner,
+        protected Scanner $scanner,
     ) {}
 
     public function execute(

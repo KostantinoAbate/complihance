@@ -16,7 +16,7 @@ beforeEach(function () {
     Config::set('complihance.granular_consent.enabled', false);
 
     Config::set('complihance.data.categories_path', __DIR__.'/../Fixtures/categories.json');
-    Config::set('complihance.data.cookies_path', __DIR__.'/../Fixtures/cookies.json');
+    Config::set('complihance.data.technologies_path', __DIR__.'/../Fixtures/cookies.json');
 
     ComplihancePolicy::shouldReceive('currentVersion')
         ->andReturn('2026-06-30');

@@ -2,13 +2,13 @@
 
 namespace KostantinoAbate\Complihance\Services\Cookies\Scanner;
 
-class CookieScanner
+class Scanner
 {
     public function __construct(
-        protected CookieJsonWriter $cookieWriter,
-        protected BrowserCookieScanner $browserScanner,
+        protected JsonWriter $technologyWriter,
+        protected BrowserScanner $browserScanner,
         protected SetCookieHeaderParser $setCookieHeaderParser,
-        protected CookieScanPersister $persister,
+        protected ScanPersister $persister,
     ) {}
 
     public function scan(
@@ -61,15 +61,21 @@ class CookieScanner
 
             $detectedCookieNames = array_values(array_unique($detectedCookieNames));
 
-            $this->cookieWriter->ensureCoreCookies();
+            $this->technologyWriter->ensureCoreTechnologies();
 
-            $addedToJson = $this->cookieWriter->addMissingCookies($detectedCookieNames);
+            $technologyItems = [
+                ...$cookies,
+                ...$storageItems,
+                ...$scripts,
+            ];
+
+            $addedToTechnologiesJson = $this->technologyWriter->addMissingTechnologies($technologyItems);
 
             $summary = [
                 'scan_id' => $scan->id,
                 'scan_uuid' => $scan->uuid,
                 'stored' => $stored,
-                'added_to_json' => $addedToJson,
+                'added_to_technologies_json' => $addedToTechnologiesJson,
                 'detected' => count($detectedCookieNames) + count($storageItems) + count($scripts),
                 'cookies_detected' => count($detectedCookieNames),
                 'storage_detected' => count($storageItems),

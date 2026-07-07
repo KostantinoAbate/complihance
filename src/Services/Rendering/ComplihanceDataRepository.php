@@ -19,17 +19,17 @@ class ComplihanceDataRepository
         return $this->readJson($this->categoriesPath());
     }
 
-    public function cookies(?string $locale = null): array
+    public function technologies(?string $locale = null): array
     {
         return $this->localizedItems(
-            $this->readJson($this->cookiesPath()),
+            $this->readJson($this->technologiesPath()),
             $locale
         );
     }
 
-    public function rawCookies(): array
+    public function rawTechnologies(): array
     {
-        return $this->readJson($this->cookiesPath());
+        return $this->readJson($this->technologiesPath());
     }
 
     public function categoryKeys(): array
@@ -56,10 +56,10 @@ class ComplihanceDataRepository
             ->all();
     }
 
-    public function cookiesPath(): string
+    public function technologiesPath(): string
     {
-        return config('complihance.data.cookies_path')
-            ?: resource_path('vendor/complihance/cookies.json');
+        return config('complihance.data.technologies_path')
+            ?: resource_path('vendor/complihance/technologies.json');
     }
 
     public function categoriesPath(): string
@@ -88,16 +88,16 @@ class ComplihanceDataRepository
 
     public function vendors(?string $locale = null): array
     {
-        return collect($this->cookies($locale))
-            ->filter(fn (array $cookie) => filled($cookie['vendor'] ?? null))
+        return collect($this->technologies($locale))
+            ->filter(fn (array $technology) => filled($technology['vendor'] ?? null))
             ->groupBy('vendor')
-            ->map(function ($cookies, string $vendor) {
+            ->map(function ($technologies, string $vendor) {
                 return [
                     'key' => str($vendor)->slug('_')->toString(),
                     'label' => $vendor,
                     'vendor' => $vendor,
-                    'category' => $cookies->first()['category'] ?? null,
-                    'cookies' => $cookies->values()->all(),
+                    'category' => $technologies->first()['category'] ?? null,
+                    'technologies' => $technologies->values()->all(),
                 ];
             })
             ->values()

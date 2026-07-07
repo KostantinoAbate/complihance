@@ -26,7 +26,7 @@ class ComplihanceServiceProvider extends PackageServiceProvider
     {
         $this->publishes([
             __DIR__.'/../resources/data/categories.json' => resource_path('vendor/complihance/categories.json'),
-            __DIR__.'/../resources/data/cookies.json' => resource_path('vendor/complihance/cookies.json'),
+            __DIR__.'/../resources/data/techbologies.json' => resource_path('vendor/complihance/techbologies.json'),
             __DIR__.'/../resources/data/texts.json' => resource_path('vendor/complihance/texts.json'),
         ], 'complihance-data');
 

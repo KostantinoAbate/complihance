@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Process;
 
-class BrowserCookieScanner
+class BrowserScanner
 {
     public function scan(
         array $urls,

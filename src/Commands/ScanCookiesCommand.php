@@ -2,8 +2,8 @@
 
 namespace KostantinoAbate\Complihance\Commands;
 
-use http\Exception\InvalidArgumentException;
 use Illuminate\Console\Command;
+use InvalidArgumentException;
 use KostantinoAbate\Complihance\Actions\Cookies\ScanCookiesAction;
 use KostantinoAbate\Complihance\Models\CookieScan;
 use KostantinoAbate\Complihance\Services\Cookies\Scanner\ScanReportExporter;
@@ -21,14 +21,13 @@ class ScanCookiesCommand extends Command
         {--setup-script= : Path to a Playwright setup script for authenticated scans}
         {--output= : Output file path}';
 
-    protected $description = 'Scan URLs, store detected cookies and add missing cookies to the published cookies JSON file.';
+    protected $description = 'Scan URLs, store detected technologies and add missing definitions to technologies.json.';
 
     public function handle(
         ScanCookiesAction $scanCookies,
         ScanReportExporter $exporter,
         SitemapUrlResolver $sitemapResolver,
-    ): int
-    {
+    ): int {
         $urls = $this->argument('url');
 
         if ($this->option('sitemap')) {
@@ -64,9 +63,10 @@ class ScanCookiesCommand extends Command
         );
 
         $this->components->info("Scan UUID: {$result['scan_uuid']}");
-        $this->components->info("Detected {$result['detected']} unique cookie(s).");
+        $this->components->info("Detected {$result['detected']} technolog(y/ies).");
         $this->components->info("Stored {$result['stored']} scan result(s).");
-        $this->components->info("Added {$result['added_to_json']} cookie(s) to resources/vendor/complihance/cookies.json.");
+        $this->components->info("Added {$result['added_to_technologies_json']} technolog(y/ies) to resources/vendor/complihance/technologies.json.");
+
         $report = $this->option('report');
 
         if ($report) {

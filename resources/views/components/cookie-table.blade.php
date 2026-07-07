@@ -1,6 +1,6 @@
-@if($cookiesByCategory->isNotEmpty())
+@if($technologiesByCategory->isNotEmpty())
     <div class="space-y-8">
-        @foreach($cookiesByCategory as $categoryKey => $cookies)
+        @foreach($technologiesByCategory as $categoryKey => $tchnologies)
             <section class="space-y-4">
                 <h2 class="text-lg font-semibold">
                     {{ $categories[$categoryKey]['label'] ?? ucfirst($categoryKey) }}
@@ -19,26 +19,26 @@
                         </thead>
 
                         <tbody>
-                        @foreach($cookies as $cookie)
+                        @foreach($tchnologies as $technology)
                             <tr>
                                 <td class="border px-3 py-2">
-                                    {{ $cookie['name'] }}
+                                    {{ $technology['name'] }}
                                 </td>
 
                                 <td class="border px-3 py-2">
-                                    {{ $cookie['vendor'] ?? '-' }}
+                                    {{ $technology['vendor'] ?? '-' }}
                                 </td>
 
                                 <td class="border px-3 py-2">
-                                    {{ $cookie['technology']['label'] ?? 'Cookie' }}
+                                    {{ $technology['technology']['label'] ?? 'Cookie' }}
                                 </td>
 
                                 <td class="border px-3 py-2">
-                                    {{ $cookie['duration'] ?? '-' }}
+                                    {{ $technology['duration'] ?? '-' }}
                                 </td>
 
                                 <td class="border px-3 py-2">
-                                    {{ $cookie['description'] ?? '-' }}
+                                    {{ $technology['description'] ?? '-' }}
                                 </td>
                             </tr>
                         @endforeach
